@@ -8,11 +8,13 @@ let carrito
 
 let domNavContainer
 let domRegistroTitle
-let domLogin
+let domLoginBtn
+let domLogin //container del login (sin modal)
+let modal
 let domLoginForm
 let domLoginUser
 let domLoginPass
-let domLoginBtn
+let domLoginCerrarModal
 let domBusqueda
 let domTextoABuscar
 let domBtnBusqueda
@@ -90,12 +92,17 @@ class Producto {
 /* ================ ELEMENTOS DEL DOM ================ */
 
 function domElementsInit() {
+
     domNavContainer = document.getElementById("nav-container")
     domRegistroTitle = document.getElementById("registro-titulo")
+    domLoginBtn = document.getElementById("login-icon")
     domLogin = document.getElementById("login-container")
+    domLoginModal = document.getElementById("login-modal")
+    modal = new bootstrap.Modal(domLoginModal)
     domLoginForm = document.getElementById("login-form")
     domLoginUser = document.getElementById("login-user")
     domLoginPass = document.getElementById("login-pass")
+    domLoginCerrarModal = document.getElementById("btnCerrarModalAgregarProducto")
     domTextoABuscar = document.getElementById("texto-a-buscar")
     domBtnBusqueda = document.getElementById("btn-busqueda")
     domRegistroForm = document.getElementById("registro-form")
@@ -111,10 +118,18 @@ function domElementsInit() {
     domTotalCompra = document.getElementById("carrito-total")
     domCatalogoPrueba = document.getElementById("catalogo-prueba")
     domCloseSession = document.getElementById("close-session")
+
 }
 
 /* ================ EVENTOS DEL DOM ================ */
 
+function eventoModalLogin() {
+    domLoginBtn?.addEventListener("click", abrirModalLogin)
+}
+
+function eventoCerrarModal() {
+    domLoginCerrarModal?.addEventListener("click", cerrarModalLogin)
+}
 
 function eventoLogin() {
     domLoginForm?.addEventListener("submit", gestionarLogin) // Al cambiar de HTML hay que verificar si el evento existe, sino da error
@@ -140,14 +155,35 @@ function eventoCloseSession() {
     domCloseSession?.addEventListener("click", cerrarSesion)
 }
 
+function domEventsInit() {
+    eventoModalLogin()
+    eventoCerrarModal()
+    eventoLogin()
+    eventoCargaCatalogoPrueba()
+    eventoSearch()
+    eventoTotalCompra()
+    eventoRegistroUsuario()
+    eventoCloseSession()
+}
+
 /* ================ DECLARACIÓN DE FUNCIONES ================ */
+
+function abrirModalLogin() {
+    modal.show()
+}
+
+function cerrarModalLogin() {
+    modal.hide()
+}
 
 function gestionarLogin(event) {
     event.preventDefault()
+    modal.hide()
     let objectUser = new Usuario(domLoginUser.value, domLoginPass.value, false)
     domLoginForm.reset();
     if (validarLogin(objectUser)) {
-        domLogin.hidden = true
+        domLoginBtn.hidden = true
+        // domLogin.hidden = true
         domNavContainer.hidden = false
         domCloseSession.innerText += `${objectUser.user} (Salir)`
         domSearch.hidden = false
@@ -224,10 +260,10 @@ function mostrarProductos(listProducts, targetActions) {
 
 function actionButtons (target, idProd) {
     const actions = {
-        "admin": `<button id="modificar-prod-${idProd}" class="btn modificar-prod-btn">Modificar</button>
-                  <button id="eliminar-prod-${idProd}" class="btn eliminar-prod-btn">Eliminar</button>`,
+        "admin": `<button id="modificar-prod-${idProd}" class="btn btn-primary modificar-prod-btn">Modificar</button>
+                  <button id="eliminar-prod-${idProd}" class="btn btn-primary  eliminar-prod-btn">Eliminar</button>`,
         "client": `<input type="number" min="0" max="50" class="cant-producto" id="cant-carrito-${idProd}">
-                   <button type="submit" id="agregar-carrito-${idProd}" class="btn agregar-carrito-btn">Agregar al carrito</button>`,
+                   <button type="submit" id="agregar-carrito-${idProd}" class="btn btn-primary agregar-carrito-btn">Agregar al carrito</button>`,
         "": ""  //! En algun momento tengo que sacar esto
     }
     return actions[target]
@@ -299,7 +335,7 @@ function mostrarCarrito() {   //Obtengo los atributos de los productos del catá
         <img src="${prodCatalogo.imagen}" alt="${prodCatalogo.tipoProd}" class="producto-img">
         <div class="producto__info">
         <h3>Producto: ${prodCatalogo.tipoProd} - ${prodCatalogo.marca}</h3>
-        <p>Precio unitario: ${prodCatalogo.precio} - Cantidad a comprar: ${cant}</p>
+        <p class="mb-0">Precio unitario: ${prodCatalogo.precio} - Cantidad a comprar: ${cant}</p>
         <h4>Subtotal: ${prodCatalogo.precio * cant}</h4>
         </div>
         `
@@ -310,21 +346,20 @@ function mostrarCarrito() {   //Obtengo los atributos de los productos del catá
 
 function finalizarCompra() {
     domTotalCompra.innerText = "Importe Total Compra: "
-    // alertar("Compra exitosa", "Muchas gracias por elegirnos", "success")
+    alertar("Compra exitosa", "Muchas gracias por elegirnos", "success")
     actualizarStockCatalogo()
     vaciarCarrito()
     mostrarProductos(productos, "client")
     mostrarCarrito()
 }
 
-// function alertar(titulo, msjSecundario, icono) {
-//     console.log(`Compra exitosa, ${titulo}, ${msjSecundario}, ${icono}`)
-//     Swal.fire(
-//         titulo,
-//         msjSecundario,
-//         icono
-//     )
-// }
+function alertar(titulo, msjSecundario, icono) {
+    Swal.fire(
+        titulo,
+        msjSecundario,
+        icono
+    )
+}
 
 function calcularTotalCompra() {
     domTotalCompra.innerText = `Importe Total Compra: $${totalCompra}`
@@ -375,12 +410,7 @@ function main() {
     usuarios.push(new Usuario("a", "a", false))
 
     domElementsInit()
-    eventoLogin()
-    eventoCargaCatalogoPrueba()
-    eventoSearch()
-    eventoTotalCompra()
-    eventoRegistroUsuario()
-    eventoCloseSession()
+    domEventsInit()
 }
 
 /* ================ LLAMADO FUNCIÓN PRINCIPAL ================ */
