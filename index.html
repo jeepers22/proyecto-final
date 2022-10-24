@@ -14,8 +14,8 @@
         <nav>
             <div id="nav-container" hidden>
                 <ul class="nav-items">
-                    <li><button id="catalogo-prueba" class="btn cargar-catalogo-btn">Cargar Catálogo de prueba</button></li>
-                    <li><a href="#carrito-container"><img class="logo-carrito" src="https://img.icons8.com/ios/50/000000/shopping-cart-loaded--v2.png"/></a></li>
+                    <li><button id="catalogo-prueba" class="btn btn-warning cargar-catalogo-btn">Cargar Catálogo de prueba</button></li>
+                    <li id="carrito-icon" hidden><a href="#carrito-container"><img class="logo-carrito" src="https://img.icons8.com/ios/50/000000/shopping-cart-loaded--v2.png"/></a></li>
                     <li id="close-session"></li>
                 </ul>
             </div>
@@ -24,13 +24,13 @@
 
     <button type="button" class="btn btn-secondary" id="login-icon">Iniciar Sesión</button>
 
-    <!-- INICIO MODAL -->
+    <!-- MODAL LOGIN -->
     <div class="modal fade" id="login-modal" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title mx-auto">Login</h5>
-                    <!-- <button type="button" class="btn-close btnCruzCerrarModalAgregarProducto" aria-label="Close"></button> -->
+                    <!-- <button type="button" class="btn-close btn-danger btnCruzCerrarModalAgregarProducto" aria-label="Close"></button> -->
                 </div>
                 <!-- CONTENIDO MODAL -->
                 <form id="login-form" class="login-form">
@@ -52,44 +52,79 @@
             </div>
         </div>
     </div>
-    <!-- FIN MODAL -->
 
-    <!-- <div id="login-container" class="login-container">
-        <form id="login-form" class="login-form">
-            <div class="login__item">
-                <label for="user">Ingrese usuario:</label>
-                <input type="text" id="login-user">
+    <!-- MODAL MODIFICAR PRODUCTO -->
+    <div class="modal fade" id="modificar-prod-modal" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title mx-auto">Modificar Producto</h5>
+                    <!-- <button type="button" class="btn-close btn-danger btnCruzCerrarModalAgregarProducto" aria-label="Close"></button> -->
+                </div>
+                <!-- CONTENIDO MODAL -->
+                <form id="modificar-prod-form" class="login-form">
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <label class="col-6" for="user">Id:</label>
+                            <input class="col-6" type="number" id="modificar-id" required>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-6" for="pass">Tipo Producto:</label>
+                            <input class="col-6" type="text" id="modificar-tipoProd" required>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-6" for="pass">Marca:</label>
+                            <input class="col-6" type="text" id="modificar-marca" required>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-6" for="user">Precio:</label>
+                            <input class="col-6" type="number" id="modificar-precio" required>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-6" for="user">Stock:</label>
+                            <input class="col-6" type="number" id="modificar-stock" required>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-6" for="user">Enlace Imagen:</label>
+                            <input class="col-6" type="text" id="modificar-imagen" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer mx-auto">
+                        <button type="submit" class="btn btn-primary login__btn">Confirmar cambios</button>
+                        <button type="button" id="btnCerrarModalModificarProducto" class="btn btn-secondary">Cerrar</button>
+                    </div>
+                </form>
             </div>
-            <div class="login__item">
-                <label for="pass">Ingrese contraseña:</label>
-                <input type="password" id="login-pass" autocomplete="off">
-            </div>
-            <button type="submit" class="btn btn-secondary login__btn">Iniciar sesión</button>
-            <a href="./secciones/registro.html">Registrarme</a>
-        </form>
-    </div> -->
+        </div>
+    </div>
 
+    <!-- BARRA DE BÚSQUEDA -->
     <div id="search-container" class="search-container" hidden>
         <form id="search-form" class="search-form">
             <input type="text" id="search-product" placeholder="producto a buscar...">
-            <button type="submit" class="btn search__btn">Buscar</button>
+            <button type="submit" class="btn btn-secondary search__btn">Buscar</button>
         </form>
     </div>
 
+    <!-- CONTENEDOR PRODUCTOS A PINTAR DINAMICAMENTE -->
     <div class="productos-container" id="productos-container"></div>
 
-    <div class="carrito-general">
+    <!-- SECCION CARRITO -->
+    <div id="carrito-general" class="carrito-general" hidden>
         <div class="carrito-header">
             <h2 class="carrito-title">CARRITO</h2>
             <button id="btn-fin-compra" class="btn btn-warning btn-fin-compra">Finalizar Compra</button>
         </div>
         <div class="carrito-container" id="carrito-container"></div>
         <h4 class="carrito-total" id="carrito-total">Importe Total Compra: </h4>
-        <!-- <h4 class="carrito-total" id="carrito-total"></h4> -->
     </div>
 
+    <!-- Importando Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <!-- Importando librería Sweet Alert y Toastify -->
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
     <script src="./javascript/index.js"></script>
 </body>
 </html>

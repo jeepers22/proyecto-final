@@ -4,17 +4,11 @@ let usuarios = []
 let productos
 let carrito
 
-// VAR DOM ELEMENTS
+// VARs DOM ELEMENTS
 
 let domNavContainer
 let domRegistroTitle
 let domLoginBtn
-let domLogin //container del login (sin modal)
-let modal
-let domLoginForm
-let domLoginUser
-let domLoginPass
-let domLoginCerrarModal
 let domBusqueda
 let domTextoABuscar
 let domBtnBusqueda
@@ -28,15 +22,39 @@ let domSearchProduct
 let domProductos
 let domCatalogoPrueba
 let domCloseSession
+let domCarritoGeneral
+let domCarritoIcon
 let domCarrito
 let domTotalCompra
 let totalCompra = 0
 let domBtnFinCompra
 
+// VARs DOM MODALES
+
+// MODAL LOGIN
+let domLoginModal
+let domCerrarLoginModal
+let modalLogin
+let domLoginForm
+let domLoginUser
+let domLoginPass
+
+// MODAL MODIFICAR
+let domUpdateForm
+let domModificarModal
+let domCerrarModificarModal
+let modalModificar
+let domModificarId
+let domModificarTipoProd
+let domModificarMarca
+let domModificarPrecio
+let domModificarStock
+let domModificarImagen
+
 /* ================ CLASE USUARIOS ================ */
 
 class Usuario {
-
+    
     // ATRIBUTOS
     constructor(user, password, admin) {
         this.user = user
@@ -96,13 +114,21 @@ function domElementsInit() {
     domNavContainer = document.getElementById("nav-container")
     domRegistroTitle = document.getElementById("registro-titulo")
     domLoginBtn = document.getElementById("login-icon")
-    domLogin = document.getElementById("login-container")
     domLoginModal = document.getElementById("login-modal")
-    modal = new bootstrap.Modal(domLoginModal)
+    modalLogin = new bootstrap.Modal(domLoginModal)
     domLoginForm = document.getElementById("login-form")
     domLoginUser = document.getElementById("login-user")
     domLoginPass = document.getElementById("login-pass")
-    domLoginCerrarModal = document.getElementById("btnCerrarModalAgregarProducto")
+    domCerrarLoginModal = document.getElementById("btnCerrarModalAgregarProducto")
+    domModificarModal = document.getElementById("modificar-prod-modal")
+    modalModificar = new bootstrap.Modal(domModificarModal)
+    domModificarId = document.getElementById("modificar-id")
+    domModificarTipoProd = document.getElementById("modificar-tipoProd")
+    domModificarMarca = document.getElementById("modificar-marca")
+    domModificarPrecio = document.getElementById("modificar-precio")
+    domModificarStock = document.getElementById("modificar-stock")
+    domModificarImagen = document.getElementById("modificar-imagen")
+    domCerrarModificarModal = document.getElementById("btnCerrarModalModificarProducto")
     domTextoABuscar = document.getElementById("texto-a-buscar")
     domBtnBusqueda = document.getElementById("btn-busqueda")
     domRegistroForm = document.getElementById("registro-form")
@@ -113,6 +139,8 @@ function domElementsInit() {
     domSearchForm = document.getElementById("search-form")
     domSearchProduct = document.getElementById("search-product")
     domProductos = document.getElementById("productos-container")
+    domCarritoIcon = document.getElementById("carrito-icon")
+    domCarritoGeneral = document.getElementById("carrito-general")
     domCarrito = document.getElementById("carrito-container")
     domBtnFinCompra = document.getElementById("btn-fin-compra")
     domTotalCompra = document.getElementById("carrito-total")
@@ -128,11 +156,15 @@ function eventoModalLogin() {
 }
 
 function eventoCerrarModal() {
-    domLoginCerrarModal?.addEventListener("click", cerrarModalLogin)
+    domCerrarLoginModal?.addEventListener("click", cerrarModalLogin)
 }
 
 function eventoLogin() {
-    domLoginForm?.addEventListener("submit", gestionarLogin) // Al cambiar de HTML hay que verificar si el evento existe, sino da error
+    domLoginForm?.addEventListener("submit", gestionarLogin)
+}
+
+function eventoCerrarModalModificarProducto() {
+    domCerrarModificarModal?.addEventListener("click", cerrarModalModificarProducto)
 }
 
 function eventoCargaCatalogoPrueba() {
@@ -159,6 +191,7 @@ function domEventsInit() {
     eventoModalLogin()
     eventoCerrarModal()
     eventoLogin()
+    eventoCerrarModalModificarProducto()
     eventoCargaCatalogoPrueba()
     eventoSearch()
     eventoTotalCompra()
@@ -169,29 +202,27 @@ function domEventsInit() {
 /* ================ DECLARACIÓN DE FUNCIONES ================ */
 
 function abrirModalLogin() {
-    modal.show()
+    modalLogin.show()
 }
 
 function cerrarModalLogin() {
-    modal.hide()
+    modalLogin.hide()
+}
+
+function cerrarModalModificarProducto() {
+    modalModificar.hide()
 }
 
 function gestionarLogin(event) {
     event.preventDefault()
-    modal.hide()
+    modalLogin.hide()
     let objectUser = new Usuario(domLoginUser.value, domLoginPass.value, false)
-    domLoginForm.reset();
+    domLoginForm.reset()
     if (validarLogin(objectUser)) {
-        domLoginBtn.hidden = true
-        // domLogin.hidden = true
-        domNavContainer.hidden = false
-        domCloseSession.innerText += `${objectUser.user} (Salir)`
-        domSearch.hidden = false
-        carrito = importarStorage("carrito") || []
         // Regenero objetos de catálogo con el array de productos importado de LS
+        domCloseSession.innerText += `${objectUser.user} (Salir)`
         cargarCatalogoImportado(importarStorage("catalogo") || [])
-        mostrarCarrito()
-        !objectUser.esAdmin() ? mostrarProductos(productos, "client") : mostrarProductos(productos,"admin")
+        !objectUser.esAdmin() ? mostrarElementos("client") : mostrarElementos("admin")
     }
     else {
         alert("Login fallido - Usuario o contraseña incorrectos")
@@ -230,6 +261,20 @@ usuarioExistente = (userAlta) => usuarios.some((usuario) => usuario.user === use
 
 productoExistente = (tipoProdAlta, marcaAlta) => productos.some((producto) => producto.tipoProd === tipoProdAlta && producto.marca === marcaAlta)
 
+function mostrarElementos(target) {
+    domLoginBtn.hidden = true
+    domNavContainer.hidden = false
+    // domCatalogoPrueba.hidden = false
+    domSearch.hidden = false
+    mostrarProductos(productos,target)
+    if (target === "client") {
+        domCarritoIcon.hidden = false
+        domCarritoGeneral.hidden = false
+        carrito = importarStorage("carrito") || []
+        mostrarCarrito()
+    }
+}
+
 function mostrarProductos(listProducts, targetActions) {
     domProductos.innerHTML = ""  // Evita carga repetida de catálogo ante más de un despliegue de de compra
 
@@ -249,11 +294,24 @@ function mostrarProductos(listProducts, targetActions) {
             `
         domProductos.append(domCard)
 
+        // Acciones para enviar productos al carrito (Clientes)
         let domBtnAltaCarrito = document.getElementById(`agregar-carrito-${producto.id}`)
         let domCantAComprar = document.getElementById(`cant-carrito-${producto.id}`)
         domBtnAltaCarrito?.addEventListener("click", () => {
             enviarACarrito(producto, domCantAComprar.value)
             domCantAComprar.value = ""
+        })
+
+        // UPDATE producto (Administador)
+        let domModificarProducto = document.getElementById(`modificar-prod-${producto.id}`)
+        domModificarProducto?.addEventListener("click", () => {
+            modificarProducto(producto)
+        })
+
+        // DELETE producto (Administrador)
+        let domEliminarProducto = document.getElementById(`eliminar-prod-${producto.id}`)
+        domEliminarProducto?.addEventListener("click", () =>{
+            eliminarProducto(producto)
         })
     })
 }
@@ -275,6 +333,67 @@ function enviarACarrito({id, stock}, cantSolicitada) {
     calcularTotalCompra()
 }
 
+function modificarProducto(producto) {
+    mostrarValoresActuales(producto)
+    domUpdateForm = document.getElementById("modificar-prod-form")
+    domUpdateForm?.addEventListener("submit", (event) => {
+        event.preventDefault()
+        const nuevoProducto = new Producto(parseInt(domModificarId.value), domModificarTipoProd.value, domModificarMarca.value, parseFloat(domModificarPrecio.value), parseInt(domModificarStock.value), domModificarImagen.value)
+        validarModificaciones(producto, nuevoProducto) && confirmarCambioProducto(producto, nuevoProducto)
+    })
+}
+
+function mostrarValoresActuales({id, tipoProd, marca, precio, stock, imagen}) {
+    modalModificar.show()
+    domModificarId.value = id
+    domModificarTipoProd.value = tipoProd
+    domModificarMarca.value = marca
+    domModificarPrecio.value = precio
+    domModificarStock.value = stock
+    domModificarImagen.value = imagen
+}
+
+function validarModificaciones ({id, tipoProd, marca, precio, stock, imagen}, nuevoProducto) {
+    if (!(id !== nuevoProducto.id || tipoProd !== nuevoProducto.tipoProd || marca !== nuevoProducto.marca || precio !== nuevoProducto.precio || stock !== nuevoProducto.stock || imagen !== nuevoProducto.imagen)) {
+        mostrarAlert("Ingreso fallido", "No ha modificado ningún valor", "warning")
+    } else if (!validarIngresoAtributos(nuevoProducto)) {
+        mostrarValoresActuales({id, tipoProd, marca, precio, stock, imagen})
+    } else {
+        return true
+    }
+}
+
+function validarIngresoAtributos({id, precio, stock}) {
+    if (id < 0) {
+        mostrarAlert("Ingreso inválido", "El id debe ser mayor a 0", "warning")
+        return
+    } else if (precio < 0) {
+        mostrarAlert("Ingreso inválido", "El precio debe ser mayor a 0", "warning")
+        return
+    } else if (stock < 0) {
+        mostrarAlert("Ingreso inválido", "El stock debe ser mayor a 0", "warning")
+        return
+    }
+    return true
+}
+
+function confirmarCambioProducto(productoActual, nuevoProducto) {
+    domUpdateForm.reset()
+    const posicionProducto = productos.indexOf(productoActual)
+    productos[posicionProducto] = nuevoProducto
+    enviarAStorage(productos, "catalogo")
+    mostrarProductos(productos,"admin")
+    mostrarAlert("Actualización exitosa", "Se ha modificado el producto seleccionado", "success")
+    modalModificar.hide()
+}
+
+function eliminarProducto(producto) {
+    const posicionProducto = productos.indexOf(producto)
+    productos.splice(posicionProducto,1)
+    enviarAStorage(productos, "catalogo")
+    mostrarProductos(productos,"admin")
+}
+
 validarRepetido = (id) => carrito.some((objectCarrito) => objectCarrito.id === id)
 
 function altaCarrito(id, stock, cantSolicitada) {
@@ -286,9 +405,12 @@ function altaCarrito(id, stock, cantSolicitada) {
         carrito.push(objectCarrito)
         enviarAStorage(carrito, "carrito")
         mostrarCarrito()
+        mostrarToast()
     }
     else {
-        alert(`No disponemos de la cantidad solicitada, puede comprar un máximo de ${stock} unidades`)
+        // Si el stock es 0 sale por false
+        stock ? mostrarAlert("Stock insuficiente", `Disponemos de un máximo de ${stock} unidades`, "warning") : 
+        mostrarAlert("Sin stock", `No quedan más unidades del producto solicitado`, "warning")
     }
 }
 
@@ -300,10 +422,26 @@ function agregarRepetidoEnCarrito(id, stock, nuevaCantSolicitada) {
         carrito[posicionRepetido].cant = acumCantSolicitada
         enviarAStorage(carrito, "carrito")
         mostrarCarrito()
+        mostrarToast()
     }
     else {
-        alert(`No disponemos de la cantidad solicitada, puede comprar un máximo de ${stock} unidades`)
+        // Si el stock es 0 sale por false
+        stock ? mostrarAlert("Stock insuficiente", `Disponemos de un máximo de ${stock} unidades`, "warning") : 
+        mostrarAlert("Sin stock", `No quedan más unidades del producto solicitado`, "warning")
     }
+}
+
+function mostrarToast() {
+    Toastify({
+        text: "Producto agregado al carrito",
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "left",
+        style: {
+            background: "linear-gradient(to right, #00b09b, #96c93d)",
+        },
+    }).showToast();
 }
 
 function enviarAStorage(objeto, nombre) {
@@ -346,14 +484,19 @@ function mostrarCarrito() {   //Obtengo los atributos de los productos del catá
 
 function finalizarCompra() {
     domTotalCompra.innerText = "Importe Total Compra: "
-    alertar("Compra exitosa", "Muchas gracias por elegirnos", "success")
-    actualizarStockCatalogo()
-    vaciarCarrito()
+    if (carrito.length === 0) {
+        mostrarAlert("Compra fallida", "No hay productos seleccionados en el carrito", "warning")
+    }
+    else {
+        actualizarStockCatalogo()
+        vaciarCarrito()
+        mostrarAlert("Compra exitosa", "Muchas gracias por elegirnos", "success")
+    }
     mostrarProductos(productos, "client")
     mostrarCarrito()
 }
 
-function alertar(titulo, msjSecundario, icono) {
+function mostrarAlert(titulo, msjSecundario, icono) {
     Swal.fire(
         titulo,
         msjSecundario,
@@ -369,8 +512,8 @@ function actualizarStockCatalogo() {
     carrito.forEach(({id, cant}) => {
         let prodCatalogo = productos.find((prod) => prod.id === id)
         prodCatalogo.disminuirStock(cant)
-    })
-    enviarAStorage(productos, "catalogo")
+        })
+        enviarAStorage(productos, "catalogo")
 }
 
 function vaciarCarrito() {
