@@ -5,7 +5,6 @@ let productos
 let carrito
 
 // VARs DOM ELEMENTS
-
 let domNavContainer
 let domRegistroTitle
 let domLoginBtn
@@ -40,7 +39,6 @@ let domLoginUser
 let domLoginPass
 
 // MODAL MODIFICAR
-let domUpdateForm
 let domModificarModal
 let domCerrarModificarModal
 let modalModificar
@@ -335,11 +333,17 @@ function enviarACarrito({id, stock}, cantSolicitada) {
 
 function modificarProducto(producto) {
     mostrarValoresActuales(producto)
-    domUpdateForm = document.getElementById("modificar-prod-form")
+    let domUpdateForm = document.getElementById("modificar-prod-form")
     domUpdateForm?.addEventListener("submit", (event) => {
         event.preventDefault()
         const nuevoProducto = new Producto(parseInt(domModificarId.value), domModificarTipoProd.value, domModificarMarca.value, parseFloat(domModificarPrecio.value), parseInt(domModificarStock.value), domModificarImagen.value)
-        validarModificaciones(producto, nuevoProducto) && confirmarCambioProducto(producto, nuevoProducto)
+        console.log(`El stock ingresado es ${nuevoProducto.stock}`)
+        if (!validarIngresoAtributos(nuevoProducto)) {
+            mostrarValoresActuales(producto)
+            console.log("Ingrese mal algún valor")
+        } else {
+            validarModificaciones(producto, nuevoProducto) ? confirmarCambioProducto(producto, nuevoProducto) : mostrarAlert("Ingreso fallido", "No ha modificado ningún valor", "warning")
+        }
     })
 }
 
@@ -353,34 +357,31 @@ function mostrarValoresActuales({id, tipoProd, marca, precio, stock, imagen}) {
     domModificarImagen.value = imagen
 }
 
-function validarModificaciones ({id, tipoProd, marca, precio, stock, imagen}, nuevoProducto) {
-    if (!(id !== nuevoProducto.id || tipoProd !== nuevoProducto.tipoProd || marca !== nuevoProducto.marca || precio !== nuevoProducto.precio || stock !== nuevoProducto.stock || imagen !== nuevoProducto.imagen)) {
-        mostrarAlert("Ingreso fallido", "No ha modificado ningún valor", "warning")
-    } else if (!validarIngresoAtributos(nuevoProducto)) {
-        mostrarValoresActuales({id, tipoProd, marca, precio, stock, imagen})
+validarModificaciones = ({id, tipoProd, marca, precio, stock, imagen}, nuevoProducto) => (id !== nuevoProducto.id || tipoProd !== nuevoProducto.tipoProd || marca !== nuevoProducto.marca || precio !== nuevoProducto.precio || stock !== nuevoProducto.stock || imagen !== nuevoProducto.imagen)
+
+function validarIngresoAtributos({id, precio, stock}) {
+    if (id <= 0) {
+        mostrarAlert("Ingreso inválido", "El id debe ser mayor a 0", "warning")
+        console.log("Alerto id menor a 0")
+        return false
+    } else if (precio <= 0) {
+        mostrarAlert("Ingreso inválido", "El precio debe ser mayor a 0", "warning")
+        console.log("Alerto precio menor a 0")
+        return false
+    } else if (stock < 0) {
+        mostrarAlert("Ingreso inválido", "El stock debe ser mayor o igual a 0", "warning")
+        console.log("Alerto stock menor a 0")
+        return false
     } else {
+        console.log("Alerto que ingreso todo ok")
         return true
     }
 }
 
-function validarIngresoAtributos({id, precio, stock}) {
-    if (id < 0) {
-        mostrarAlert("Ingreso inválido", "El id debe ser mayor a 0", "warning")
-        return
-    } else if (precio < 0) {
-        mostrarAlert("Ingreso inválido", "El precio debe ser mayor a 0", "warning")
-        return
-    } else if (stock < 0) {
-        mostrarAlert("Ingreso inválido", "El stock debe ser mayor a 0", "warning")
-        return
-    }
-    return true
-}
-
 function confirmarCambioProducto(productoActual, nuevoProducto) {
-    domUpdateForm.reset()
     const posicionProducto = productos.indexOf(productoActual)
     productos[posicionProducto] = nuevoProducto
+    console.log(productos[posicionProducto])
     enviarAStorage(productos, "catalogo")
     mostrarProductos(productos,"admin")
     mostrarAlert("Actualización exitosa", "Se ha modificado el producto seleccionado", "success")
