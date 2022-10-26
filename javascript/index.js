@@ -8,6 +8,7 @@ let carrito
 let domNavContainer
 let domRegistroTitle
 let domLoginBtn
+let domAltaBtn
 let domBusqueda
 let domTextoABuscar
 let domBtnBusqueda
@@ -38,10 +39,22 @@ let domLoginForm
 let domLoginUser
 let domLoginPass
 
-// MODAL MODIFICAR
+// MODAL ALTA PRODUCTO
+let domAltaModal
+let modalAlta
+let domCerrarAltaModal
+let domAltaId
+let domAltaTipoProd
+let domAltaMarca
+let domAltaPrecio
+let domAltaStock
+let domAltaImagen
+
+// MODAL MODIFICAR PRODUCTO
 let domModificarModal
 let domCerrarModificarModal
 let modalModificar
+let domAltaForm
 let domModificarId
 let domModificarTipoProd
 let domModificarMarca
@@ -52,7 +65,7 @@ let domModificarImagen
 /* ================ CLASE USUARIOS ================ */
 
 class Usuario {
-    
+
     // ATRIBUTOS
     constructor(user, password, admin) {
         this.user = user
@@ -117,7 +130,7 @@ function domElementsInit() {
     domLoginForm = document.getElementById("login-form")
     domLoginUser = document.getElementById("login-user")
     domLoginPass = document.getElementById("login-pass")
-    domCerrarLoginModal = document.getElementById("btnCerrarModalAgregarProducto")
+    domCerrarLoginModal = document.getElementById("btnCerrarModalLogin")
     domModificarModal = document.getElementById("modificar-prod-modal")
     modalModificar = new bootstrap.Modal(domModificarModal)
     domModificarId = document.getElementById("modificar-id")
@@ -127,6 +140,17 @@ function domElementsInit() {
     domModificarStock = document.getElementById("modificar-stock")
     domModificarImagen = document.getElementById("modificar-imagen")
     domCerrarModificarModal = document.getElementById("btnCerrarModalModificarProducto")
+    domAltaBtn = document.getElementById("create-icon")
+    domAltaModal = document.getElementById("alta-prod-modal")
+    modalAlta = new bootstrap.Modal(domAltaModal)
+    domAltaForm = document.getElementById("alta-prod-form")
+    domAltaId = document.getElementById("alta-id")
+    domAltaTipoProd = document.getElementById("alta-tipoProducto")
+    domAltaMarca = document.getElementById("alta-marca")
+    domAltaPrecio = document.getElementById("alta-precio")
+    domAltaStock = document.getElementById("alta-stock")
+    domAltaImagen = document.getElementById("alta-imagen")
+    domCerrarAltaModal = document.getElementById("btnCerrarModalAltaProducto")
     domTextoABuscar = document.getElementById("texto-a-buscar")
     domBtnBusqueda = document.getElementById("btn-busqueda")
     domRegistroForm = document.getElementById("registro-form")
@@ -161,6 +185,18 @@ function eventoLogin() {
     domLoginForm?.addEventListener("submit", gestionarLogin)
 }
 
+function eventoModalAlta() {
+    domAltaBtn?.addEventListener("click", abrirModalAlta)
+}
+
+function eventoCerrarModalAltaProducto() {
+    domCerrarAltaModal?.addEventListener("click", cerrarModalAltaProducto)
+}
+
+function eventoAltaProducto() {
+    domAltaForm?.addEventListener("submit", gestionarAltaProducto)
+}
+
 function eventoCerrarModalModificarProducto() {
     domCerrarModificarModal?.addEventListener("click", cerrarModalModificarProducto)
 }
@@ -178,7 +214,7 @@ function eventoTotalCompra() {
 }
 
 function eventoRegistroUsuario() {
-    domRegistroForm?.addEventListener("submit", gestionarAlta)
+    domRegistroForm?.addEventListener("submit", gestionarAltaUsuario)
 }
 
 function eventoCloseSession() {
@@ -189,6 +225,9 @@ function domEventsInit() {
     eventoModalLogin()
     eventoCerrarModal()
     eventoLogin()
+    eventoModalAlta()
+    eventoCerrarModalAltaProducto()
+    eventoAltaProducto()
     eventoCerrarModalModificarProducto()
     eventoCargaCatalogoPrueba()
     eventoSearch()
@@ -205,6 +244,14 @@ function abrirModalLogin() {
 
 function cerrarModalLogin() {
     modalLogin.hide()
+}
+
+function abrirModalAlta() {
+    modalAlta.show()
+}
+
+function cerrarModalAltaProducto() {
+    modalAlta.hide()
 }
 
 function cerrarModalModificarProducto() {
@@ -240,7 +287,7 @@ function searchProduct(event) {
     domSearchForm.reset()
 }
 
-function gestionarAlta(event) {
+function gestionarAltaUsuario(event) {
     event.preventDefault()
     domRegistroTitle.innerHTML = ""
     let objectUser = new Usuario(domRegistroUser.value, domRegistroPass.value, false)
@@ -265,11 +312,18 @@ function mostrarElementos(target) {
     // domCatalogoPrueba.hidden = false
     domSearch.hidden = false
     mostrarProductos(productos,target)
-    if (target === "client") {
-        domCarritoIcon.hidden = false
-        domCarritoGeneral.hidden = false
-        carrito = importarStorage("carrito") || []
-        mostrarCarrito()
+    switch (target) {
+        case "client":
+            domCarritoIcon.hidden = false
+            domCarritoGeneral.hidden = false
+            carrito = importarStorage("carrito") || []
+            mostrarCarrito()
+            break
+        case "admin":
+            domAltaBtn.hidden = false
+            break
+        default:
+            console.log("Se ingresó un target inexistente")
     }
 }
 
@@ -331,30 +385,53 @@ function enviarACarrito({id, stock}, cantSolicitada) {
     calcularTotalCompra()
 }
 
+function gestionarAltaProducto(event) {
+    event.preventDefault()
+    const nuevoProducto = new Producto(parseInt(domAltaId.value), domAltaTipoProd.value, domAltaMarca.value, parseFloat(domAltaPrecio.value), parseInt(domAltaStock.value), domAltaImagen.value)
+    if (!validarIngresoAtributos(nuevoProducto)) {
+        mostrarModalCompleto("alta", nuevoProducto)
+    } else {
+        confirmarAltaProducto(nuevoProducto)
+    }
+}
+
 function modificarProducto(producto) {
-    mostrarValoresActuales(producto)
+    mostrarModalCompleto("modificar", producto)
     let domUpdateForm = document.getElementById("modificar-prod-form")
     domUpdateForm?.addEventListener("submit", (event) => {
         event.preventDefault()
         const nuevoProducto = new Producto(parseInt(domModificarId.value), domModificarTipoProd.value, domModificarMarca.value, parseFloat(domModificarPrecio.value), parseInt(domModificarStock.value), domModificarImagen.value)
-        console.log(`El stock ingresado es ${nuevoProducto.stock}`)
         if (!validarIngresoAtributos(nuevoProducto)) {
-            mostrarValoresActuales(producto)
-            console.log("Ingrese mal algún valor")
+            mostrarModalCompleto("modificar", producto)
         } else {
             validarModificaciones(producto, nuevoProducto) ? confirmarCambioProducto(producto, nuevoProducto) : mostrarAlert("Ingreso fallido", "No ha modificado ningún valor", "warning")
         }
     })
 }
 
-function mostrarValoresActuales({id, tipoProd, marca, precio, stock, imagen}) {
-    modalModificar.show()
-    domModificarId.value = id
-    domModificarTipoProd.value = tipoProd
-    domModificarMarca.value = marca
-    domModificarPrecio.value = precio
-    domModificarStock.value = stock
-    domModificarImagen.value = imagen
+function mostrarModalCompleto(modal, {id, tipoProd, marca, precio, stock, imagen}) {
+    switch (modal) {
+        case "alta":
+            modalAlta.show()
+            domAltaId.value = id
+            domAltaTipoProd.value = tipoProd
+            domAltaMarca.value = marca
+            domAltaPrecio.value = precio
+            domAltaStock.value = stock
+            domAltaImagen.value = imagen
+            break
+        case "modificar":
+            modalModificar.show()
+            domModificarId.value = id
+            domModificarTipoProd.value = tipoProd
+            domModificarMarca.value = marca
+            domModificarPrecio.value = precio
+            domModificarStock.value = stock
+            domModificarImagen.value = imagen
+            break
+        default:
+            console.log("El modal a desplegar no existe")
+    }
 }
 
 validarModificaciones = ({id, tipoProd, marca, precio, stock, imagen}, nuevoProducto) => (id !== nuevoProducto.id || tipoProd !== nuevoProducto.tipoProd || marca !== nuevoProducto.marca || precio !== nuevoProducto.precio || stock !== nuevoProducto.stock || imagen !== nuevoProducto.imagen)
@@ -362,26 +439,30 @@ validarModificaciones = ({id, tipoProd, marca, precio, stock, imagen}, nuevoProd
 function validarIngresoAtributos({id, precio, stock}) {
     if (id <= 0) {
         mostrarAlert("Ingreso inválido", "El id debe ser mayor a 0", "warning")
-        console.log("Alerto id menor a 0")
         return false
     } else if (precio <= 0) {
         mostrarAlert("Ingreso inválido", "El precio debe ser mayor a 0", "warning")
-        console.log("Alerto precio menor a 0")
         return false
     } else if (stock < 0) {
         mostrarAlert("Ingreso inválido", "El stock debe ser mayor o igual a 0", "warning")
-        console.log("Alerto stock menor a 0")
         return false
     } else {
-        console.log("Alerto que ingreso todo ok")
         return true
     }
+}
+
+function confirmarAltaProducto(producto){
+    productos.unshift(producto)
+    enviarAStorage(productos, "catalogo")
+    mostrarProductos(productos,"admin")
+    mostrarAlert("Alta exitosa", "Se ha registrado el nuevo producto", "success")
+    domAltaForm.reset()
+    modalAlta.hide()
 }
 
 function confirmarCambioProducto(productoActual, nuevoProducto) {
     const posicionProducto = productos.indexOf(productoActual)
     productos[posicionProducto] = nuevoProducto
-    console.log(productos[posicionProducto])
     enviarAStorage(productos, "catalogo")
     mostrarProductos(productos,"admin")
     mostrarAlert("Actualización exitosa", "Se ha modificado el producto seleccionado", "success")

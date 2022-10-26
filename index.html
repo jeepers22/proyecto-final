@@ -30,7 +30,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title mx-auto">Login</h5>
-                    <!-- <button type="button" class="btn-close btn-danger btnCruzCerrarModalAgregarProducto" aria-label="Close"></button> -->
+                    <!-- <button type="button" class="btn-close btn-danger" aria-label="Close"></button> -->
                 </div>
                 <!-- CONTENIDO MODAL -->
                 <form id="login-form" class="login-form">
@@ -46,7 +46,52 @@
                     </div>
                     <div class="modal-footer mx-auto">
                         <button type="submit" class="btn btn-primary login__btn">Iniciar sesión</button>
-                        <button type="button" id="btnCerrarModalAgregarProducto" class="btn btn-secondary">Cerrar</button>
+                        <button type="button" id="btnCerrarModalLogin" class="btn btn-secondary">Cerrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ALTA PRODUCTO -->
+    <div class="modal fade" id="alta-prod-modal" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title mx-auto">Nuevo Producto</h5>
+                    <!-- <button type="button" class="btn-close btn-danger" aria-label="Close"></button> -->
+                </div>
+                <!-- CONTENIDO MODAL -->
+                <form id="alta-prod-form" class="alta-form">
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <label class="col-6" for="alta-id">Id:</label>
+                            <input class="col-6" type="number" name="alta-id" id="alta-id" required>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-6" for="alta-tipoProducto">Tipo Producto:</label>
+                            <input class="col-6" type="text" name="alta-tipoProducto" id="alta-tipoProducto" required>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-6" for="alta-marca">Marca:</label>
+                            <input class="col-6" type="text" name="alta-marca" id="alta-marca" required>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-6" for="alta-precio">Precio:</label>
+                            <input class="col-6" type="number" name="alta-precio" id="alta-precio" required>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-6" for="alta-stock">Stock:</label>
+                            <input class="col-6" type="number" name="alta-stock" id="alta-stock" required>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-6" for="alta-imagen">Enlace Imagen:</label>
+                            <input class="col-6" type="text" name="alta-imagen" id="alta-imagen" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer mx-auto">
+                        <button type="submit" class="btn btn-primary">Registrar Producto</button>
+                        <button type="button" id="btnCerrarModalAltaProducto" class="btn btn-secondary">Cerrar</button>
                     </div>
                 </form>
             </div>
@@ -59,10 +104,10 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title mx-auto">Modificar Producto</h5>
-                    <!-- <button type="button" class="btn-close btn-danger btnCruzCerrarModalAgregarProducto" aria-label="Close"></button> -->
+                    <!-- <button type="button" class="btn-close btn-danger" aria-label="Close"></button> -->
                 </div>
                 <!-- CONTENIDO MODAL -->
-                <form id="modificar-prod-form" class="login-form">
+                <form id="modificar-prod-form" class="modificar-form">
                     <div class="modal-body">
                         <div class="row mb-3">
                             <label class="col-6" for="user">Id:</label>
@@ -90,7 +135,7 @@
                         </div>
                     </div>
                     <div class="modal-footer mx-auto">
-                        <button type="submit" class="btn btn-primary login__btn">Confirmar cambios</button>
+                        <button type="submit" class="btn btn-primary">Confirmar cambios</button>
                         <button type="button" id="btnCerrarModalModificarProducto" class="btn btn-secondary">Cerrar</button>
                     </div>
                 </form>
@@ -105,6 +150,8 @@
             <button type="submit" class="btn btn-secondary search__btn">Buscar</button>
         </form>
     </div>
+
+    <button type="button" class="btn btn-primary" id="create-icon" hidden>Nuevo Producto</button>
 
     <!-- CONTENEDOR PRODUCTOS A PINTAR DINAMICAMENTE -->
     <div class="productos-container" id="productos-container"></div>

@@ -57,7 +57,7 @@ a {
     margin-top: 50px;
 }
 
-.login-form, .registro-form {
+.login-form, .registro-form, .alta-form, .modificar-form {
     display: flex;
     flex-direction: column;
     margin: 0 auto;
