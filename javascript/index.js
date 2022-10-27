@@ -453,6 +453,7 @@ function validarIngresoAtributos({id, precio, stock}) {
 
 function confirmarAltaProducto(producto){
     productos.unshift(producto)
+    registrarProductoMockAPI(producto)
     enviarAStorage(productos, "catalogo")
     mostrarProductos(productos,"admin")
     mostrarAlert("Alta exitosa", "Se ha registrado el nuevo producto", "success")
@@ -472,6 +473,7 @@ function confirmarCambioProducto(productoActual, nuevoProducto) {
 function eliminarProducto(producto) {
     const posicionProducto = productos.indexOf(producto)
     productos.splice(posicionProducto,1)
+    eliminarProductoMockAPI(producto.id)
     enviarAStorage(productos, "catalogo")
     mostrarProductos(productos,"admin")
 }
@@ -603,23 +605,74 @@ function vaciarCarrito() {
     localStorage.removeItem("carrito")
 }
 
-function cargarCatalogoPrueba() {
+// GET PARA CARGAR CATALOGO DE MOCK API
+// async function importarCatalogoMockAPI() {
+async function cargarCatalogoPrueba() {
+    try {
+        const response = await fetch("https://6358ae4ec26aac906f466377.mockapi.io/productos")
+        const data = await response.json()
+        const catalogoImportadoJSON = [...data]
+        cargarCatalogoImportado(catalogoImportadoJSON)
 
-    productos = []
-
-    productos.push(new Producto(1, "Paleta", "BlackCrown", 60000, 10, "./img/paleta-black.png"))
-    productos.push(new Producto(2, "Paleta", "ML10", 50000, 5, "./img/paleta-ml10.png"))
-    productos.push(new Producto(3, "Paleta", "Siux", 65000, 15, "./img/paleta-siux.png"))
-    productos.push(new Producto(4, "Paleta", "WingPro", 35000, 4, "./img/paleta-wing.png"))
-    productos.push(new Producto(5, "Bolso", "Adidas", 25000, 10, "./img/bolso-adidas.jpg"))
-    productos.push(new Producto(6, "Mochila", "Nike", 18000, 6, "./img/mochila-nike.jpg"))
-    productos.push(new Producto(7, "Muñequeras", "UnderArmour", 1000, 15, "./img/muniequera-under.jpg"))
-    productos.push(new Producto(8, "Tubo Pelotas", "Adidas", 2000, 8, "./img/pelotas-adidas.jpg"))
-    productos.push(new Producto(9, "Tubo Pelotas", "Prince", 1500, 4, "./img/pelotas-prince.jpg"))
-
-    enviarAStorage(productos, "catalogo")
-    mostrarProductos(productos, "client")
+        enviarAStorage(productos, "catalogo")
+        mostrarProductos(productos, "client")
+    }
+    catch (error) {
+        console.log(error)
+    }
 }
+
+function cargarCatalogoImportado(productosImportados) {
+    productos = []
+    productosImportados.forEach(({id, tipoProd, marca, precio, stock, imagen}) => productos.push(new Producto(id, tipoProd, marca, precio, stock, imagen)))
+}
+
+// POST MOCK API
+async function registrarProductoMockAPI(producto) {
+    try {
+        const response = await fetch("https://6358ae4ec26aac906f466377.mockapi.io/productos",
+        {
+            method: "POST",
+            body: JSON.stringify(producto),
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            }
+        })
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
+// DELETE MOCK API
+async function eliminarProductoMockAPI(idProducto) {
+    try {
+        const response = await fetch(`https://6358ae4ec26aac906f466377.mockapi.io/productos/${idProducto}`, {
+            method: "DELETE",
+        })
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
+// function cargarCatalogoPrueba() {
+
+//     productos = []
+
+//     productos.push(new Producto(1, "Paleta", "BlackCrown", 60000, 10, "./img/paleta-black.png"))
+//     productos.push(new Producto(2, "Paleta", "ML10", 50000, 5, "./img/paleta-ml10.png"))
+//     productos.push(new Producto(3, "Paleta", "Siux", 65000, 15, "./img/paleta-siux.png"))
+//     productos.push(new Producto(4, "Paleta", "WingPro", 35000, 4, "./img/paleta-wing.png"))
+//     productos.push(new Producto(5, "Bolso", "Adidas", 25000, 10, "./img/bolso-adidas.jpg"))
+//     productos.push(new Producto(6, "Mochila", "Nike", 18000, 6, "./img/mochila-nike.jpg"))
+//     productos.push(new Producto(7, "Muñequeras", "UnderArmour", 1000, 15, "./img/muniequera-under.jpg"))
+//     productos.push(new Producto(8, "Tubo Pelotas", "Adidas", 2000, 8, "./img/pelotas-adidas.jpg"))
+//     productos.push(new Producto(9, "Tubo Pelotas", "Prince", 1500, 4, "./img/pelotas-prince.jpg"))
+
+//     enviarAStorage(productos, "catalogo")
+//     mostrarProductos(productos, "client")
+// }
 
 function cerrarSesion() {
     document.location.reload()

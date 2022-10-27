@@ -29,19 +29,19 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title mx-auto">Login</h5>
+                    <h5 class="modal-title mx-auto">Inicia Sesión</h5>
                     <!-- <button type="button" class="btn-close btn-danger" aria-label="Close"></button> -->
                 </div>
                 <!-- CONTENIDO MODAL -->
                 <form id="login-form" class="login-form">
                     <div class="modal-body">
                         <div class="row mb-3">
-                            <label class="col-6" for="user">Ingrese usuario:</label>
-                            <input class="col-6" type="text" id="login-user">
+                            <label class="col-6" for="login-user">Usuario</label>
+                            <input class="col-6" type="text" name="login-user" id="login-user">
                         </div>
                         <div class="row mb-3">
-                            <label class="col-6" for="pass">Ingrese contraseña:</label>
-                            <input class="col-6" type="password" id="login-pass" autocomplete="off">
+                            <label class="col-6" for="login-pass">Contraseña</label>
+                            <input class="col-6" type="password" name="login-pass" id="login-pass" autocomplete="off">
                         </div>
                     </div>
                     <div class="modal-footer mx-auto">
@@ -58,34 +58,34 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title mx-auto">Nuevo Producto</h5>
+                    <h5 class="modal-title mx-auto">Alta Producto</h5>
                     <!-- <button type="button" class="btn-close btn-danger" aria-label="Close"></button> -->
                 </div>
                 <!-- CONTENIDO MODAL -->
                 <form id="alta-prod-form" class="alta-form">
                     <div class="modal-body">
                         <div class="row mb-3">
-                            <label class="col-6" for="alta-id">Id:</label>
+                            <label class="col-6" for="alta-id">Id</label>
                             <input class="col-6" type="number" name="alta-id" id="alta-id" required>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-6" for="alta-tipoProducto">Tipo Producto:</label>
+                            <label class="col-6" for="alta-tipoProducto">Tipo Producto</label>
                             <input class="col-6" type="text" name="alta-tipoProducto" id="alta-tipoProducto" required>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-6" for="alta-marca">Marca:</label>
+                            <label class="col-6" for="alta-marca">Marca</label>
                             <input class="col-6" type="text" name="alta-marca" id="alta-marca" required>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-6" for="alta-precio">Precio:</label>
+                            <label class="col-6" for="alta-precio">Precio</label>
                             <input class="col-6" type="number" name="alta-precio" id="alta-precio" required>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-6" for="alta-stock">Stock:</label>
+                            <label class="col-6" for="alta-stock">Stock</label>
                             <input class="col-6" type="number" name="alta-stock" id="alta-stock" required>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-6" for="alta-imagen">Enlace Imagen:</label>
+                            <label class="col-6" for="alta-imagen">Enlace Imagen</label>
                             <input class="col-6" type="text" name="alta-imagen" id="alta-imagen" required>
                         </div>
                     </div>
@@ -110,28 +110,28 @@
                 <form id="modificar-prod-form" class="modificar-form">
                     <div class="modal-body">
                         <div class="row mb-3">
-                            <label class="col-6" for="user">Id:</label>
-                            <input class="col-6" type="number" id="modificar-id" required>
+                            <label class="col-6" for="modificar-id">Id</label>
+                            <input class="col-6" type="number" name="modificar-id" id="modificar-id" required>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-6" for="pass">Tipo Producto:</label>
-                            <input class="col-6" type="text" id="modificar-tipoProd" required>
+                            <label class="col-6" for="modificar-tipoProd">Tipo Producto</label>
+                            <input class="col-6" type="text" name="modificar-tipoProd" id="modificar-tipoProd" required>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-6" for="pass">Marca:</label>
-                            <input class="col-6" type="text" id="modificar-marca" required>
+                            <label class="col-6" for="modificar-marca">Marca</label>
+                            <input class="col-6" type="text" name="modificar-marca" id="modificar-marca" required>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-6" for="user">Precio:</label>
-                            <input class="col-6" type="number" id="modificar-precio" required>
+                            <label class="col-6" for="modificar-precio">Precio</label>
+                            <input class="col-6" type="number" name="modificar-precio" id="modificar-precio" required>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-6" for="user">Stock:</label>
-                            <input class="col-6" type="number" id="modificar-stock" required>
+                            <label class="col-6" for="modificar-stock">Stock</label>
+                            <input class="col-6" type="number" name="modificar-stock" id="modificar-stock" required>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-6" for="user">Enlace Imagen:</label>
-                            <input class="col-6" type="text" id="modificar-imagen" required>
+                            <label class="col-6" for="modificar-imagen">Enlace Imagen</label>
+                            <input class="col-6" type="text" name="modificar-imagen" id="modificar-imagen" required>
                         </div>
                     </div>
                     <div class="modal-footer mx-auto">
