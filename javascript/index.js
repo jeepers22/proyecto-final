@@ -20,7 +20,6 @@ let domSearch
 let domSearchForm
 let domSearchProduct
 let domProductos
-let domCatalogoPrueba
 let domCloseSession
 let domCarritoGeneral
 let domCarritoIcon
@@ -162,7 +161,6 @@ function domElementsInit() {
     domCarrito = document.getElementById("carrito-container")
     domBtnFinCompra = document.getElementById("btn-fin-compra")
     domTotalCompra = document.getElementById("carrito-total")
-    domCatalogoPrueba = document.getElementById("catalogo-prueba")
     domCloseSession = document.getElementById("close-session")
 
 }
@@ -197,10 +195,6 @@ function eventoCerrarModalModificarProducto() {
     domCerrarModificarModal?.addEventListener("click", cerrarModalModificarProducto)
 }
 
-function eventoCargaCatalogoPrueba() {
-    domCatalogoPrueba?.addEventListener("click", cargarCatalogoPrueba)
-}
-
 function eventoSearch() {
     domSearchForm?.addEventListener("submit", searchProduct)
 }
@@ -225,7 +219,6 @@ function domEventsInit() {
     eventoCerrarModalAltaProducto()
     eventoAltaProducto()
     eventoCerrarModalModificarProducto()
-    eventoCargaCatalogoPrueba()
     eventoSearch()
     eventoTotalCompra()
     eventoRegistroUsuario()
@@ -305,9 +298,8 @@ productoExistente = (tipoProdAlta, marcaAlta) => productos.some((producto) => pr
 function mostrarElementos(target) {
     domLoginBtn.hidden = true
     domNavContainer.hidden = false
-    // domCatalogoPrueba.hidden = false
     domSearch.hidden = false
-    mostrarProductos(productos,target)
+    importarCatalogoMockAPI(target)
     switch (target) {
         case "client":
             domCarritoIcon.hidden = false
@@ -597,23 +589,17 @@ function vaciarCarrito() {
 }
 
 // GET PARA CARGAR CATALOGO DE MOCK API
-// async function importarCatalogoMockAPI() {
-async function cargarCatalogoPrueba() {
+async function importarCatalogoMockAPI(target) {
     try {
         const response = await fetch("https://6358ae4ec26aac906f466377.mockapi.io/productos")
         const data = await response.json()
         const catalogoImportadoJSON = [...data]
         cargarCatalogoImportado(catalogoImportadoJSON)
-        mostrarProductos(productos, "client")
+        mostrarProductos(productos, target)
     }
     catch (error) {
         console.log(error)
     }
-}
-
-function cargarCatalogoImportado(productosImportados) {
-    productos = []
-    productosImportados.forEach(({id, tipoProd, marca, precio, stock, imagen}) => productos.push(new Producto(id, tipoProd, marca, precio, stock, imagen)))
 }
 
 // POST MOCK API
@@ -661,24 +647,6 @@ async function eliminarProductoMockAPI(idProducto) {
         console.log(error)
     }
 }
-
-// function cargarCatalogoPrueba() {
-
-//     productos = []
-
-//     productos.push(new Producto(1, "Paleta", "BlackCrown", 60000, 10, "./img/paleta-black.png"))
-//     productos.push(new Producto(2, "Paleta", "ML10", 50000, 5, "./img/paleta-ml10.png"))
-//     productos.push(new Producto(3, "Paleta", "Siux", 65000, 15, "./img/paleta-siux.png"))
-//     productos.push(new Producto(4, "Paleta", "WingPro", 35000, 4, "./img/paleta-wing.png"))
-//     productos.push(new Producto(5, "Bolso", "Adidas", 25000, 10, "./img/bolso-adidas.jpg"))
-//     productos.push(new Producto(6, "Mochila", "Nike", 18000, 6, "./img/mochila-nike.jpg"))
-//     productos.push(new Producto(7, "Muñequeras", "UnderArmour", 1000, 15, "./img/muniequera-under.jpg"))
-//     productos.push(new Producto(8, "Tubo Pelotas", "Adidas", 2000, 8, "./img/pelotas-adidas.jpg"))
-//     productos.push(new Producto(9, "Tubo Pelotas", "Prince", 1500, 4, "./img/pelotas-prince.jpg"))
-
-//     enviarAStorage(productos, "catalogo")
-//     mostrarProductos(productos, "client")
-// }
 
 function cerrarSesion() {
     document.location.reload()
