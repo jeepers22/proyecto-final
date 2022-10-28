@@ -255,7 +255,6 @@ function gestionarLogin(event) {
     if (validarLogin(objectUser)) {
         // Regenero objetos de catálogo con el array de productos importado de LS
         domCloseSession.innerText += `${objectUser.user} (Salir)`
-        cargarCatalogoImportado(importarStorage("catalogo") || [])
         !objectUser.esAdmin() ? mostrarElementos("client") : mostrarElementos("admin")
     }
     else {
@@ -305,7 +304,7 @@ function mostrarElementos(target) {
             domCarritoIcon.hidden = false
             domCarritoGeneral.hidden = false
             carrito = importarStorage("carrito") || []
-            mostrarCarrito()
+            // mostrarCarrito()
             break
         case "admin":
             domAltaBtn.hidden = false
@@ -596,6 +595,9 @@ async function importarCatalogoMockAPI(target) {
         const catalogoImportadoJSON = [...data]
         cargarCatalogoImportado(catalogoImportadoJSON)
         mostrarProductos(productos, target)
+        if (target === "client") {
+            mostrarCarrito()
+        }
     }
     catch (error) {
         console.log(error)
