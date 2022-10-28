@@ -43,7 +43,6 @@ let domLoginPass
 let domAltaModal
 let modalAlta
 let domCerrarAltaModal
-let domAltaId
 let domAltaTipoProd
 let domAltaMarca
 let domAltaPrecio
@@ -55,7 +54,6 @@ let domModificarModal
 let domCerrarModificarModal
 let modalModificar
 let domAltaForm
-let domModificarId
 let domModificarTipoProd
 let domModificarMarca
 let domModificarPrecio
@@ -133,7 +131,6 @@ function domElementsInit() {
     domCerrarLoginModal = document.getElementById("btnCerrarModalLogin")
     domModificarModal = document.getElementById("modificar-prod-modal")
     modalModificar = new bootstrap.Modal(domModificarModal)
-    domModificarId = document.getElementById("modificar-id")
     domModificarTipoProd = document.getElementById("modificar-tipoProd")
     domModificarMarca = document.getElementById("modificar-marca")
     domModificarPrecio = document.getElementById("modificar-precio")
@@ -144,7 +141,6 @@ function domElementsInit() {
     domAltaModal = document.getElementById("alta-prod-modal")
     modalAlta = new bootstrap.Modal(domAltaModal)
     domAltaForm = document.getElementById("alta-prod-form")
-    domAltaId = document.getElementById("alta-id")
     domAltaTipoProd = document.getElementById("alta-tipoProducto")
     domAltaMarca = document.getElementById("alta-marca")
     domAltaPrecio = document.getElementById("alta-precio")
@@ -387,33 +383,34 @@ function enviarACarrito({id, stock}, cantSolicitada) {
 
 function gestionarAltaProducto(event) {
     event.preventDefault()
-    const nuevoProducto = new Producto(parseInt(domAltaId.value), domAltaTipoProd.value, domAltaMarca.value, parseFloat(domAltaPrecio.value), parseInt(domAltaStock.value), domAltaImagen.value)
+    //! REVISAR QUÉ DEBERÍA PONER EN EL ID
+    const nuevoProducto = new Producto(1, domAltaTipoProd.value, domAltaMarca.value, parseFloat(domAltaPrecio.value), parseInt(domAltaStock.value), domAltaImagen.value)
     if (!validarIngresoAtributos(nuevoProducto)) {
-        mostrarModalCompleto("alta", nuevoProducto)
+        mostrarModalConValores("alta", nuevoProducto)
     } else {
         confirmarAltaProducto(nuevoProducto)
     }
 }
 
 function modificarProducto(producto) {
-    mostrarModalCompleto("modificar", producto)
+    mostrarModalConValores("modificar", producto)
     let domUpdateForm = document.getElementById("modificar-prod-form")
     domUpdateForm?.addEventListener("submit", (event) => {
         event.preventDefault()
-        const nuevoProducto = new Producto(parseInt(domModificarId.value), domModificarTipoProd.value, domModificarMarca.value, parseFloat(domModificarPrecio.value), parseInt(domModificarStock.value), domModificarImagen.value)
+        //! REVISAR QUÉ DEBERÍA PONER EN EL ID
+        const nuevoProducto = new Producto(1, domModificarTipoProd.value, domModificarMarca.value, parseFloat(domModificarPrecio.value), parseInt(domModificarStock.value), domModificarImagen.value)
         if (!validarIngresoAtributos(nuevoProducto)) {
-            mostrarModalCompleto("modificar", producto)
+            mostrarModalConValores("modificar", producto)
         } else {
             validarModificaciones(producto, nuevoProducto) ? confirmarCambioProducto(producto, nuevoProducto) : mostrarAlert("Ingreso fallido", "No ha modificado ningún valor", "warning")
         }
     })
 }
 
-function mostrarModalCompleto(modal, {id, tipoProd, marca, precio, stock, imagen}) {
+function mostrarModalConValores(modal, {tipoProd, marca, precio, stock, imagen}) {
     switch (modal) {
         case "alta":
             modalAlta.show()
-            domAltaId.value = id
             domAltaTipoProd.value = tipoProd
             domAltaMarca.value = marca
             domAltaPrecio.value = precio
@@ -422,7 +419,6 @@ function mostrarModalCompleto(modal, {id, tipoProd, marca, precio, stock, imagen
             break
         case "modificar":
             modalModificar.show()
-            domModificarId.value = id
             domModificarTipoProd.value = tipoProd
             domModificarMarca.value = marca
             domModificarPrecio.value = precio
@@ -436,11 +432,8 @@ function mostrarModalCompleto(modal, {id, tipoProd, marca, precio, stock, imagen
 
 validarModificaciones = ({id, tipoProd, marca, precio, stock, imagen}, nuevoProducto) => (id !== nuevoProducto.id || tipoProd !== nuevoProducto.tipoProd || marca !== nuevoProducto.marca || precio !== nuevoProducto.precio || stock !== nuevoProducto.stock || imagen !== nuevoProducto.imagen)
 
-function validarIngresoAtributos({id, precio, stock}) {
-    if (id <= 0) {
-        mostrarAlert("Ingreso inválido", "El id debe ser mayor a 0", "warning")
-        return false
-    } else if (precio <= 0) {
+function validarIngresoAtributos({precio, stock}) {
+    if  (precio <= 0) {
         mostrarAlert("Ingreso inválido", "El precio debe ser mayor a 0", "warning")
         return false
     } else if (stock < 0) {
