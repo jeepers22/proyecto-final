@@ -255,7 +255,7 @@ function gestionarLogin(event) {
     if (validarLogin(objectUser)) {
         // Regenero objetos de catálogo con el array de productos importado de LS
         domCloseSession.innerText += `${objectUser.user} (Salir)`
-        !objectUser.esAdmin() ? mostrarElementos("client") : mostrarElementos("admin")
+        mostrarElementos(objectUser)
     }
     else {
         alert("Login fallido - Usuario o contraseña incorrectos")
@@ -266,6 +266,71 @@ function gestionarLogin(event) {
 
 // Aplicando desestructuración en parámetros del objeto Usuario
 validarLogin = ({user, password}) => usuarios.some((usuario) => (usuario.user === user && usuario.password === password))
+
+function mostrarElementos(objectUser) {
+    domLoginBtn.hidden = true
+    domNavContainer.hidden = false
+    domSearch.hidden = false
+    importarCatalogoMockAPI(objectUser)
+    if (objectUser.esAdmin()) {
+        domAltaBtn.hidden = false
+    } else {
+        domCarritoIcon.hidden = false
+        domCarritoGeneral.hidden = false
+        carrito = importarStorage(objectUser.user) || []
+    }
+}
+
+function mostrarProductos(listProducts, objectUser) {
+    domProductos.innerHTML = ""  // Evita carga repetida de catálogo ante más de un despliegue de de compra
+
+    listProducts.forEach((producto) => {
+        let domCard = document.createElement("div")
+        domCard.className = "producto-card"
+        domCard.id = "producto-card-${producto.id}"
+        domCard.innerHTML = `
+            <img src="${producto.imagen}" alt="${producto.tipoProd}" class="producto-img">
+            <div class="producto__info">
+                <h3>Producto: ${producto.tipoProd} - ${producto.marca}</h3>
+                <p>Precio: ${producto.precio} - Disponibles: ${producto.stock}</p>
+            </div>
+            <div class="producto__compra">
+                ${actionButtons(producto.id, objectUser.esAdmin())}
+            </div>
+            `
+        domProductos.append(domCard)
+
+        // Acciones para enviar productos al carrito (Clientes)
+        let domBtnAltaCarrito = document.getElementById(`agregar-carrito-${producto.id}`)
+        let domCantAComprar = document.getElementById(`cant-carrito-${producto.id}`)
+        domBtnAltaCarrito?.addEventListener("click", () => {
+            enviarACarrito(objectUser.user, producto, domCantAComprar.value)
+            domCantAComprar.value = ""
+        })
+
+        // UPDATE producto (Administador)
+        let domModificarProducto = document.getElementById(`modificar-prod-${producto.id}`)
+        domModificarProducto?.addEventListener("click", () => {
+            modificarProducto(producto)
+        })
+
+        // DELETE producto (Administrador)
+        let domEliminarProducto = document.getElementById(`eliminar-prod-${producto.id}`)
+        domEliminarProducto?.addEventListener("click", () =>{
+            eliminarProducto(producto)
+        })
+    })
+}
+
+function actionButtons (idProd, isAdmin) {
+    if (isAdmin) {
+        return `<button id="modificar-prod-${idProd}" class="btn btn-primary modificar-prod-btn">Modificar</button>
+                <button id="eliminar-prod-${idProd}" class="btn btn-primary  eliminar-prod-btn">Eliminar</button>`
+    } else {
+        return `<input type="number" min="0" max="50" class="cant-producto" id="cant-carrito-${idProd}">
+                <button type="submit" id="agregar-carrito-${idProd}" class="btn btn-primary agregar-carrito-btn">Agregar al carrito</button>`
+    }
+}
 
 function searchProduct(event) {
     event.preventDefault()
@@ -294,81 +359,11 @@ usuarioExistente = (userAlta) => usuarios.some((usuario) => usuario.user === use
 
 productoExistente = (tipoProdAlta, marcaAlta) => productos.some((producto) => producto.tipoProd === tipoProdAlta && producto.marca === marcaAlta)
 
-function mostrarElementos(target) {
-    domLoginBtn.hidden = true
-    domNavContainer.hidden = false
-    domSearch.hidden = false
-    importarCatalogoMockAPI(target)
-    switch (target) {
-        case "client":
-            domCarritoIcon.hidden = false
-            domCarritoGeneral.hidden = false
-            carrito = importarStorage("carrito") || []
-            // mostrarCarrito()
-            break
-        case "admin":
-            domAltaBtn.hidden = false
-            break
-        default:
-            console.log("Se ingresó un target inexistente")
-    }
-}
 
-function mostrarProductos(listProducts, targetActions) {
-    domProductos.innerHTML = ""  // Evita carga repetida de catálogo ante más de un despliegue de de compra
 
-    listProducts.forEach((producto) => {
-        let domCard = document.createElement("div")
-        domCard.className = "producto-card"
-        domCard.id = "producto-card-${producto.id}"
-        domCard.innerHTML = `
-            <img src="${producto.imagen}" alt="${producto.tipoProd}" class="producto-img">
-            <div class="producto__info">
-                <h3>Producto: ${producto.tipoProd} - ${producto.marca}</h3>
-                <p>Precio: ${producto.precio} - Disponibles: ${producto.stock}</p>
-            </div>
-            <div class="producto__compra">
-                ${actionButtons(targetActions, producto.id)}
-            </div>
-            `
-        domProductos.append(domCard)
-
-        // Acciones para enviar productos al carrito (Clientes)
-        let domBtnAltaCarrito = document.getElementById(`agregar-carrito-${producto.id}`)
-        let domCantAComprar = document.getElementById(`cant-carrito-${producto.id}`)
-        domBtnAltaCarrito?.addEventListener("click", () => {
-            enviarACarrito(producto, domCantAComprar.value)
-            domCantAComprar.value = ""
-        })
-
-        // UPDATE producto (Administador)
-        let domModificarProducto = document.getElementById(`modificar-prod-${producto.id}`)
-        domModificarProducto?.addEventListener("click", () => {
-            modificarProducto(producto)
-        })
-
-        // DELETE producto (Administrador)
-        let domEliminarProducto = document.getElementById(`eliminar-prod-${producto.id}`)
-        domEliminarProducto?.addEventListener("click", () =>{
-            eliminarProducto(producto)
-        })
-    })
-}
-
-function actionButtons (target, idProd) {
-    const actions = {
-        "admin": `<button id="modificar-prod-${idProd}" class="btn btn-primary modificar-prod-btn">Modificar</button>
-                  <button id="eliminar-prod-${idProd}" class="btn btn-primary  eliminar-prod-btn">Eliminar</button>`,
-        "client": `<input type="number" min="0" max="50" class="cant-producto" id="cant-carrito-${idProd}">
-                   <button type="submit" id="agregar-carrito-${idProd}" class="btn btn-primary agregar-carrito-btn">Agregar al carrito</button>`,
-        "": ""  //! En algun momento tengo que sacar esto
-    }
-    return actions[target]
-}
-
-function enviarACarrito({id, stock}, cantSolicitada) {
+function enviarACarrito(userName, {idProd, stock}, cantSolicitada) {
     const cantCompra = parseInt(cantSolicitada)
-    !validarRepetido(id) ? altaCarrito(id, stock, cantCompra) : agregarRepetidoEnCarrito(id, stock, cantCompra)
+    !validarRepetido(userName, idProd) ? altaCarrito(userName, idProd, stock, cantCompra) : agregarRepetidoEnCarrito(userName, idProd, stock, cantCompra)
     calcularTotalCompra()
 }
 
@@ -460,13 +455,16 @@ function eliminarProducto(producto) {
     mostrarProductos(productos,"admin")
 }
 
-validarRepetido = (id) => carrito.some((objectCarrito) => objectCarrito.id === id)
+validarRepetido = (userName, idProd) => carrito.some((objectCarrito) => objectCarrito.user === user && objectCarrito.prod.id === idProd)
 
-function altaCarrito(id, stock, cantSolicitada) {
+function altaCarrito(user, id, stock, cantSolicitada) {
     if (cantSolicitada <= stock) {
         let objectCarrito = {
-            id: id,
-            cant: cantSolicitada
+            user: user,
+            prod: {
+                id: id,
+                cant: cantSolicitada
+            }
         }
         carrito.push(objectCarrito)
         enviarAStorage(carrito, "carrito")
@@ -480,7 +478,7 @@ function altaCarrito(id, stock, cantSolicitada) {
     }
 }
 
-function agregarRepetidoEnCarrito(id, stock, nuevaCantSolicitada) {
+function agregarRepetidoEnCarrito(user, id, stock, nuevaCantSolicitada) {
     const idsCarrito = carrito.map((objectCarrito) => objectCarrito.id)
     const posicionRepetido = idsCarrito.indexOf(id)
     const acumCantSolicitada = carrito[posicionRepetido].cant + nuevaCantSolicitada
@@ -588,15 +586,15 @@ function vaciarCarrito() {
 }
 
 // GET PARA CARGAR CATALOGO DE MOCK API
-async function importarCatalogoMockAPI(target) {
+async function importarCatalogoMockAPI(objectUser) {
     try {
         const response = await fetch("https://6358ae4ec26aac906f466377.mockapi.io/productos")
         const data = await response.json()
         const catalogoImportadoJSON = [...data]
         cargarCatalogoImportado(catalogoImportadoJSON)
-        mostrarProductos(productos, target)
-        if (target === "client") {
-            mostrarCarrito()
+        mostrarProductos(productos, objectUser)
+        if (!objectUser.esAdmin()) {
+            mostrarCarrito(objectUser.user)
         }
     }
     catch (error) {
