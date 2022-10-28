@@ -464,6 +464,7 @@ function confirmarAltaProducto(producto){
 function confirmarCambioProducto(productoActual, nuevoProducto) {
     const posicionProducto = productos.indexOf(productoActual)
     productos[posicionProducto] = nuevoProducto
+    modificarProductoMockAPI(productoActual.id, nuevoProducto)
     enviarAStorage(productos, "catalogo")
     mostrarProductos(productos,"admin")
     mostrarAlert("Actualización exitosa", "Se ha modificado el producto seleccionado", "success")
@@ -633,6 +634,23 @@ async function registrarProductoMockAPI(producto) {
         const response = await fetch("https://6358ae4ec26aac906f466377.mockapi.io/productos",
         {
             method: "POST",
+            body: JSON.stringify(producto),
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            }
+        })
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
+// PUT MOCK API
+async function modificarProductoMockAPI(idProducto, producto) {
+    try {
+        const response = await fetch(`https://6358ae4ec26aac906f466377.mockapi.io/productos/${idProducto}`,
+        {
+            method: "PUT",
             body: JSON.stringify(producto),
             headers: {
                 "Content-type": "application/json; charset=UTF-8"
