@@ -361,9 +361,9 @@ productoExistente = (tipoProdAlta, marcaAlta) => productos.some((producto) => pr
 
 
 
-function enviarACarrito(userName, {idProd, stock}, cantSolicitada) {
+function enviarACarrito(user, {idProd, stock}, cantSolicitada) {
     const cantCompra = parseInt(cantSolicitada)
-    !validarRepetido(userName, idProd) ? altaCarrito(userName, idProd, stock, cantCompra) : agregarRepetidoEnCarrito(userName, idProd, stock, cantCompra)
+    !validarRepetido(user, idProd) ? altaCarrito(useridProd, stock, cantCompra) : agregarRepetidoEnCarrito(idProd, stock, cantCompra)
     calcularTotalCompra()
 }
 
@@ -455,9 +455,9 @@ function eliminarProducto(producto) {
     mostrarProductos(productos,"admin")
 }
 
-validarRepetido = (userName, idProd) => carrito.some((objectCarrito) => objectCarrito.user === user && objectCarrito.prod.id === idProd)
+validarRepetido = (user, idProd) => carrito.some((objectCarrito) => objectCarrito.user === user && objectCarrito.prod.id === idProd)
 
-function altaCarrito(user, id, stock, cantSolicitada) {
+function altaCarrito(id, stock, cantSolicitada) {
     if (cantSolicitada <= stock) {
         let objectCarrito = {
             user: user,
@@ -478,7 +478,7 @@ function altaCarrito(user, id, stock, cantSolicitada) {
     }
 }
 
-function agregarRepetidoEnCarrito(user, id, stock, nuevaCantSolicitada) {
+function agregarRepetidoEnCarrito(id, stock, nuevaCantSolicitada) {
     const idsCarrito = carrito.map((objectCarrito) => objectCarrito.id)
     const posicionRepetido = idsCarrito.indexOf(id)
     const acumCantSolicitada = carrito[posicionRepetido].cant + nuevaCantSolicitada
