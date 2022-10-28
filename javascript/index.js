@@ -361,9 +361,9 @@ productoExistente = (tipoProdAlta, marcaAlta) => productos.some((producto) => pr
 
 
 
-function enviarACarrito(user, {idProd, stock}, cantSolicitada) {
+function enviarACarrito(userName, {id, stock}, cantSolicitada) {
     const cantCompra = parseInt(cantSolicitada)
-    !validarRepetido(user, idProd) ? altaCarrito(useridProd, stock, cantCompra) : agregarRepetidoEnCarrito(idProd, stock, cantCompra)
+    !validarRepetido(id) ? altaCarrito(userName, id, stock, cantCompra) : agregarRepetidoEnCarrito(userName, id, stock, cantCompra)
     calcularTotalCompra()
 }
 
@@ -455,19 +455,17 @@ function eliminarProducto(producto) {
     mostrarProductos(productos,"admin")
 }
 
-validarRepetido = (user, idProd) => carrito.some((objectCarrito) => objectCarrito.user === user && objectCarrito.prod.id === idProd)
+validarRepetido = (idProd) => carrito.some((objectCarrito) => objectCarrito.id === idProd)
 
-function altaCarrito(id, stock, cantSolicitada) {
+function altaCarrito(userName, id, stock, cantSolicitada) {
     if (cantSolicitada <= stock) {
         let objectCarrito = {
-            user: user,
-            prod: {
                 id: id,
                 cant: cantSolicitada
             }
-        }
+        console.log(objectCarrito)
         carrito.push(objectCarrito)
-        enviarAStorage(carrito, "carrito")
+        enviarAStorage(carrito, userName)
         mostrarCarrito()
         mostrarToast()
     }
@@ -478,13 +476,13 @@ function altaCarrito(id, stock, cantSolicitada) {
     }
 }
 
-function agregarRepetidoEnCarrito(id, stock, nuevaCantSolicitada) {
+function agregarRepetidoEnCarrito(userName, id, stock, nuevaCantSolicitada) {
     const idsCarrito = carrito.map((objectCarrito) => objectCarrito.id)
     const posicionRepetido = idsCarrito.indexOf(id)
     const acumCantSolicitada = carrito[posicionRepetido].cant + nuevaCantSolicitada
     if (acumCantSolicitada <= stock) {
         carrito[posicionRepetido].cant = acumCantSolicitada
-        enviarAStorage(carrito, "carrito")
+        enviarAStorage(carrito, userName)
         mostrarCarrito()
         mostrarToast()
     }
@@ -513,8 +511,8 @@ function enviarAStorage(objeto, nombre) {
     localStorage.setItem(nombre, objetoJSON)
 }
 
-function importarStorage(nombre) {
-    return JSON.parse(localStorage.getItem(nombre))
+function importarStorage(userName) {
+    return JSON.parse(localStorage.getItem(userName))
 }
 
 function cargarCatalogoImportado(productosImportados) {
