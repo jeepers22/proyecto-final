@@ -447,7 +447,6 @@ function validarIngresoAtributos({precio, stock}) {
 function confirmarAltaProducto(producto){
     productos.unshift(producto)
     registrarProductoMockAPI(producto)
-    enviarAStorage(productos, "catalogo")
     mostrarProductos(productos,"admin")
     mostrarAlert("Alta exitosa", "Se ha registrado el nuevo producto", "success")
     domAltaForm.reset()
@@ -458,7 +457,6 @@ function confirmarCambioProducto(productoActual, nuevoProducto) {
     const posicionProducto = productos.indexOf(productoActual)
     productos[posicionProducto] = nuevoProducto
     modificarProductoMockAPI(productoActual.id, nuevoProducto)
-    enviarAStorage(productos, "catalogo")
     mostrarProductos(productos,"admin")
     mostrarAlert("Actualización exitosa", "Se ha modificado el producto seleccionado", "success")
     modalModificar.hide()
@@ -468,7 +466,6 @@ function eliminarProducto(producto) {
     const posicionProducto = productos.indexOf(producto)
     productos.splice(posicionProducto,1)
     eliminarProductoMockAPI(producto.id)
-    enviarAStorage(productos, "catalogo")
     mostrarProductos(productos,"admin")
 }
 
@@ -590,8 +587,8 @@ function actualizarStockCatalogo() {
     carrito.forEach(({id, cant}) => {
         let prodCatalogo = productos.find((prod) => prod.id === id)
         prodCatalogo.disminuirStock(cant)
+        modificarProductoMockAPI(prodCatalogo.id, prodCatalogo)
         })
-        enviarAStorage(productos, "catalogo")
 }
 
 function vaciarCarrito() {
@@ -607,8 +604,6 @@ async function cargarCatalogoPrueba() {
         const data = await response.json()
         const catalogoImportadoJSON = [...data]
         cargarCatalogoImportado(catalogoImportadoJSON)
-
-        enviarAStorage(productos, "catalogo")
         mostrarProductos(productos, "client")
     }
     catch (error) {
