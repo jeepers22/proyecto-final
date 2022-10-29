@@ -159,7 +159,7 @@ function domElementsInit() {
     domCarritoIcon = document.getElementById("carrito-icon")
     domCarritoGeneral = document.getElementById("carrito-general")
     domCarrito = document.getElementById("carrito-container")
-    domBtnFinCompra = document.getElementById("btn-fin-compra")
+    // domBtnFinCompra = document.getElementById("btn-fin-compra")
     domTotalCompra = document.getElementById("carrito-total")
     domCloseSession = document.getElementById("close-session")
 
@@ -199,9 +199,9 @@ function eventoSearch() {
     domSearchForm?.addEventListener("submit", searchProduct)
 }
 
-function eventoTotalCompra() {
-    domBtnFinCompra?.addEventListener("click", finalizarCompra)
-}
+// function eventoTotalCompra() {
+//     domBtnFinCompra?.addEventListener("click", finalizarCompra)
+// }
 
 function eventoRegistroUsuario() {
     domRegistroForm?.addEventListener("submit", gestionarAltaUsuario)
@@ -220,7 +220,7 @@ function domEventsInit() {
     eventoAltaProducto()
     eventoCerrarModalModificarProducto()
     eventoSearch()
-    eventoTotalCompra()
+    // eventoTotalCompra()
     eventoRegistroUsuario()
     eventoCloseSession()
 }
@@ -274,6 +274,7 @@ function mostrarElementos(objectUser) {
     importarCatalogoMockAPI(objectUser)
     if (objectUser.esAdmin()) {
         domAltaBtn.hidden = false
+        gestionarAltaProducto(objectUser)
     } else {
         domCarritoIcon.hidden = false
         domCarritoGeneral.hidden = false
@@ -311,13 +312,19 @@ function mostrarProductos(listProducts, objectUser) {
         // UPDATE producto (Administador)
         let domModificarProducto = document.getElementById(`modificar-prod-${producto.id}`)
         domModificarProducto?.addEventListener("click", () => {
-            modificarProducto(producto)
+            modificarProducto(producto, objectUser)
         })
 
         // DELETE producto (Administrador)
         let domEliminarProducto = document.getElementById(`eliminar-prod-${producto.id}`)
         domEliminarProducto?.addEventListener("click", () =>{
-            eliminarProducto(producto)
+            eliminarProducto(producto, objectuser)
+        })
+
+        console.log(objectUser)
+        let domBtnFinCompra = document.getElementById("btn-fin-compra")
+        domBtnFinCompra?.addEventListener("click", (objectUser) => {
+            finalizarCompra(objectUser)
         })
     })
 }
@@ -367,18 +374,18 @@ function enviarACarrito(userName, {id, stock}, cantSolicitada) {
     calcularTotalCompra()
 }
 
-function gestionarAltaProducto(event) {
+function gestionarAltaProducto(event, objectUser) {
     event.preventDefault()
     //! REVISAR QUÉ DEBERÍA PONER EN EL ID
     const nuevoProducto = new Producto(1, domAltaTipoProd.value, domAltaMarca.value, parseFloat(domAltaPrecio.value), parseInt(domAltaStock.value), domAltaImagen.value)
     if (!validarIngresoAtributos(nuevoProducto)) {
         mostrarModalConValores("alta", nuevoProducto)
     } else {
-        confirmarAltaProducto(nuevoProducto)
+        confirmarAltaProducto(nuevoProducto, objectUser)
     }
 }
 
-function modificarProducto(producto) {
+function modificarProducto(producto, objectUser) {
     mostrarModalConValores("modificar", producto)
     let domUpdateForm = document.getElementById("modificar-prod-form")
     domUpdateForm?.addEventListener("submit", (event) => {
@@ -388,7 +395,7 @@ function modificarProducto(producto) {
         if (!validarIngresoAtributos(nuevoProducto)) {
             mostrarModalConValores("modificar", producto)
         } else {
-            validarModificaciones(producto, nuevoProducto) ? confirmarCambioProducto(producto, nuevoProducto) : mostrarAlert("Ingreso fallido", "No ha modificado ningún valor", "warning")
+            validarModificaciones(producto, nuevoProducto) ? confirmarCambioProducto(producto, nuevoProducto, objectUser) : mostrarAlert("Ingreso fallido", "No ha modificado ningún valor", "warning")
         }
     })
 }
@@ -430,20 +437,20 @@ function validarIngresoAtributos({precio, stock}) {
     }
 }
 
-function confirmarAltaProducto(producto){
+function confirmarAltaProducto(producto, objectUser){
     productos.unshift(producto)
     registrarProductoMockAPI(producto)
-    mostrarProductos(productos,"admin")
+    mostrarProductos(productos, objectUser)
     mostrarAlert("Alta exitosa", "Se ha registrado el nuevo producto", "success")
     domAltaForm.reset()
     modalAlta.hide()
 }
 
-function confirmarCambioProducto(productoActual, nuevoProducto) {
+function confirmarCambioProducto(productoActual, nuevoProducto, objectuser) {
     const posicionProducto = productos.indexOf(productoActual)
     productos[posicionProducto] = nuevoProducto
     modificarProductoMockAPI(productoActual.id, nuevoProducto)
-    mostrarProductos(productos,"admin")
+    mostrarProductos(productos,objectuser)
     mostrarAlert("Actualización exitosa", "Se ha modificado el producto seleccionado", "success")
     modalModificar.hide()
 }
@@ -452,7 +459,7 @@ function eliminarProducto(producto) {
     const posicionProducto = productos.indexOf(producto)
     productos.splice(posicionProducto,1)
     eliminarProductoMockAPI(producto.id)
-    mostrarProductos(productos,"admin")
+    mostrarProductos(productos,objectUser)
 }
 
 validarRepetido = (idProd) => carrito.some((objectCarrito) => objectCarrito.id === idProd)
@@ -544,18 +551,18 @@ function mostrarCarrito() {   //Obtengo los atributos de los productos del catá
     })
 }
 
-function finalizarCompra() {
+function finalizarCompra(objectUser) {
     domTotalCompra.innerText = "Importe Total Compra: "
     if (carrito.length === 0) {
         mostrarAlert("Compra fallida", "No hay productos seleccionados en el carrito", "warning")
     }
     else {
         actualizarStockCatalogo()
-        vaciarCarrito()
+        vaciarCarrito(objectUser.user)
         mostrarAlert("Compra exitosa", "Muchas gracias por elegirnos", "success")
     }
-    mostrarProductos(productos, "client")
-    mostrarCarrito()
+    // mostrarProductos(productos, objectUser)
+    mostrarCarrito(objectUser.user)
 }
 
 function mostrarAlert(titulo, msjSecundario, icono) {
@@ -578,9 +585,9 @@ function actualizarStockCatalogo() {
         })
 }
 
-function vaciarCarrito() {
+function vaciarCarrito(userName) {
     carrito = []
-    localStorage.removeItem("carrito")
+    localStorage.removeItem(userName)
 }
 
 // GET PARA CARGAR CATALOGO DE MOCK API
