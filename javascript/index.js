@@ -26,7 +26,7 @@ let domCarritoIcon
 let domCarrito
 let domTotalCompra
 let totalCompra = 0
-let domBtnFinCompra
+// let domBtnFinCompra  BORRAR
 
 // VARs DOM MODALES
 
@@ -320,12 +320,10 @@ function mostrarProductos(listProducts, objectUser) {
         domEliminarProducto?.addEventListener("click", () =>{
             eliminarProducto(producto, objectuser)
         })
-
-        console.log(objectUser)
-        let domBtnFinCompra = document.getElementById("btn-fin-compra")
-        domBtnFinCompra?.addEventListener("click", (objectUser) => {
-            finalizarCompra(objectUser)
-        })
+    })
+    let domBtnFinCompra = document.getElementById("btn-fin-compra")
+    domBtnFinCompra?.addEventListener("click", () => {
+        finalizarCompra(objectUser)
     })
 }
 
@@ -470,7 +468,6 @@ function altaCarrito(userName, id, stock, cantSolicitada) {
                 id: id,
                 cant: cantSolicitada
             }
-        console.log(objectCarrito)
         carrito.push(objectCarrito)
         enviarAStorage(carrito, userName)
         mostrarCarrito()
@@ -561,7 +558,7 @@ function finalizarCompra(objectUser) {
         vaciarCarrito(objectUser.user)
         mostrarAlert("Compra exitosa", "Muchas gracias por elegirnos", "success")
     }
-    // mostrarProductos(productos, objectUser)
+    mostrarProductos(productos, objectUser)
     mostrarCarrito(objectUser.user)
 }
 
