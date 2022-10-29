@@ -267,33 +267,6 @@ function gestionarLogin(event) {
 // Aplicando desestructuración en parámetros del objeto Usuario
 validarLogin = ({user, password}) => usuarios.some((usuario) => (usuario.user === user && usuario.password === password))
 
-function searchProduct(event) {
-    event.preventDefault()
-    let searchProd = domSearchProduct.value
-    let listProducts = productos.filter((prod) => prod.tipoProd.toLowerCase().includes(searchProd.toLowerCase()))
-    searchProd == "" ? alert("Debe ingresar un producto a buscar") : mostrarProductos(listProducts,"client")
-    domSearchForm.reset()
-}
-
-function gestionarAltaUsuario(event) {
-    event.preventDefault()
-    domRegistroTitle.innerHTML = ""
-    let objectUser = new Usuario(domRegistroUser.value, domRegistroPass.value, false)
-    domRegistroForm.reset();
-    if (!usuarioExistente(objectUser.user)) {
-        objectUser.registrarUsuario()
-        domRegistroTitle.innerHTML += `El usuario ${objectUser.user} se ha registrado exitosamente!`
-        console.log(usuarios)
-    }
-    else {
-        domRegistroTitle.innerHTML += `Alta fallida - El usuario que intenta registrar ya existe`
-    }
-}
-
-usuarioExistente = (userAlta) => usuarios.some((usuario) => usuario.user === userAlta)
-
-productoExistente = (tipoProdAlta, marcaAlta) => productos.some((producto) => producto.tipoProd === tipoProdAlta && producto.marca === marcaAlta)
-
 function mostrarElementos(target) {
     domLoginBtn.hidden = true
     domNavContainer.hidden = false
@@ -365,6 +338,33 @@ function actionButtons (target, idProd) {
     }
     return actions[target]
 }
+
+function searchProduct(event) {
+    event.preventDefault()
+    let searchProd = domSearchProduct.value
+    let listProducts = productos.filter((prod) => prod.tipoProd.toLowerCase().includes(searchProd.toLowerCase()))
+    searchProd == "" ? alert("Debe ingresar un producto a buscar") : mostrarProductos(listProducts,"client")
+    domSearchForm.reset()
+}
+
+function gestionarAltaUsuario(event) {
+    event.preventDefault()
+    domRegistroTitle.innerHTML = ""
+    let objectUser = new Usuario(domRegistroUser.value, domRegistroPass.value, false)
+    domRegistroForm.reset();
+    if (!usuarioExistente(objectUser.user)) {
+        objectUser.registrarUsuario()
+        domRegistroTitle.innerHTML += `El usuario ${objectUser.user} se ha registrado exitosamente!`
+        console.log(usuarios)
+    }
+    else {
+        domRegistroTitle.innerHTML += `Alta fallida - El usuario que intenta registrar ya existe`
+    }
+}
+
+usuarioExistente = (userAlta) => usuarios.some((usuario) => usuario.user === userAlta)
+
+productoExistente = (tipoProdAlta, marcaAlta) => productos.some((producto) => producto.tipoProd === tipoProdAlta && producto.marca === marcaAlta)
 
 function enviarACarrito({id, stock}, cantSolicitada) {
     const cantCompra = parseInt(cantSolicitada)
