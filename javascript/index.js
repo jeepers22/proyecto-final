@@ -69,21 +69,20 @@ let domModificarImagen
 class Usuario {
 
     // ATRIBUTOS
-    constructor(user, password, admin) {
+    constructor(id, user, password, admin) {
+        this.id = id
         this.user = user
         this.password = password
         this.admin = admin // true=admin false=cliente
     }
 
     // MÉTODOS
-    esAdmin = () => usuarios.find((usuario) => usuario.user === this.user).admin
+    asignarTarget = () => this.admin ? "admin" : "client"
 
-    registrarUsuario = () => {
-        usuarios.push(this)
-    }
 }
 
 /* ================ CLASE PRODUCTO ================ */
+
 class Producto {
 
     // ATRIBUTOS
@@ -98,26 +97,10 @@ class Producto {
 
     // MÉTODOS
 
-    comprar = (cant) => {
-        if (this.validarStock(cant)) {
-            this.disminuirStock(cant)
-            alert("Compra efectuada con éxito\nMuchas gracias!")
-            console.log(`Stock actualizado - Quedan ${this.stock} unidades del producto ${this.tipoProd} ${this.marca}`)
-        }
-        else {
-            alert(`Stock insuficiente - Hay ${this.stock} unidades de ${this.tipoProd} ${this.marca}`)
-        }
-    }
-
-    validarStock = (cant) => this.stock >= cant
-
     disminuirStock = (cant) => {
         this.stock = this.stock - cant
     }
 
-    altaCatalogo = () => {
-        productos.push(this)
-    }
 }
 
 /* ================ ELEMENTOS DEL DOM ================ */
@@ -234,6 +217,7 @@ function domEventsInit() {
 
 function abrirModalLogin() {
     modalLogin.show()
+
 }
 
 function cerrarModalLogin() {
@@ -255,11 +239,15 @@ function cerrarModalModificarProducto() {
 function gestionarLogin(event) {
     event.preventDefault()
     modalLogin.hide()
-    usuarioLogueado = new Usuario(domLoginUser.value, domLoginPass.value, false)
+    // El id se autogenera de forma incremental desde mockAPI
+    // usuarioLogueado = new Usuario("", domLoginUser.value, domLoginPass.value, "")
+    const userIngresado = domLoginUser.value
+    const passwordIngresado = domLoginPass.value
     domLoginForm.reset()
-    if (validarLogin(usuarioLogueado)) {
-        domCloseSession.innerText += `${usuarioLogueado.user} (Salir)`
-        usuarioLogueado.esAdmin() ? target = "admin" : target = "client"
+    if (validarLogin(userIngresado, passwordIngresado)) {
+        domCloseSession.innerText += `${userIngresado} (Salir)`
+        usuarioLogueado = usuarios.find((usuario) => usuario.user === userIngresado && usuario.password === passwordIngresado)
+        target = usuarioLogueado.asignarTarget()
         mostrarElementos()
     }
     else {
@@ -270,7 +258,7 @@ function gestionarLogin(event) {
 }
 
 // Aplicando desestructuración en parámetros del objeto Usuario
-validarLogin = ({user, password}) => usuarios.some((usuario) => (usuario.user === user && usuario.password === password))
+validarLogin = (user, password) => usuarios.some((usuario) => (usuario.user === user && usuario.password === password))
 
 function mostrarElementos() {
     domLoginBtn.hidden = true
@@ -351,35 +339,14 @@ function searchProduct(event) {
 }
 
 function confirmarBusqueda(productosABuscar) {
-    usuarioLogueado.esAdmin() ? mostrarProductos(productosABuscar,"admin") : mostrarProductos(productosABuscar,"client")
+    mostrarProductos(productosABuscar)
     let dombtnReiniciarBusqueda = document.getElementById("btnReiniciarBusqueda")
     dombtnReiniciarBusqueda.hidden = false
     dombtnReiniciarBusqueda.addEventListener("click", () => {
-        console.log(usuarioLogueado)
-        console.log(usuarioLogueado.esAdmin())
-        usuarioLogueado.esAdmin() ? mostrarProductos(productos,"admin") : mostrarProductos(productos,"client")
+        mostrarProductos(productos)
         dombtnReiniciarBusqueda.hidden = true
     })
 }
-
-function gestionarAltaUsuario(event) {
-    event.preventDefault()
-    domRegistroTitle.innerHTML = ""
-    let objectUser = new Usuario(domRegistroUser.value, domRegistroPass.value, false)
-    domRegistroForm.reset();
-    if (!usuarioExistente(objectUser.user)) {
-        objectUser.registrarUsuario()
-        domRegistroTitle.innerHTML += `El usuario ${objectUser.user} se ha registrado exitosamente!`
-        console.log(usuarios)
-    }
-    else {
-        domRegistroTitle.innerHTML += `Alta fallida - El usuario que intenta registrar ya existe`
-    }
-}
-
-usuarioExistente = (userAlta) => usuarios.some((usuario) => usuario.user === userAlta)
-
-productoExistente = (tipoProdAlta, marcaAlta) => productos.some((producto) => producto.tipoProd === tipoProdAlta && producto.marca === marcaAlta)
 
 function enviarACarrito({id, stock}, cantSolicitada) {
     const cantCompra = parseInt(cantSolicitada)
@@ -388,8 +355,8 @@ function enviarACarrito({id, stock}, cantSolicitada) {
 
 function gestionarAltaProducto(event) {
     event.preventDefault()
-    //! REVISAR QUÉ DEBERÍA PONER EN EL ID
-    const nuevoProducto = new Producto(1, domAltaTipoProd.value, domAltaMarca.value, parseFloat(domAltaPrecio.value), parseInt(domAltaStock.value), domAltaImagen.value)
+    // El id se autogenera de forma incremental desde mockAPI
+    const nuevoProducto = new Producto("", domAltaTipoProd.value, domAltaMarca.value, parseFloat(domAltaPrecio.value), parseInt(domAltaStock.value), domAltaImagen.value)
     if (!validarIngresoAtributos(nuevoProducto)) {
         mostrarModalConValores("alta", nuevoProducto)
     } else {
@@ -402,7 +369,6 @@ function modificarProducto(producto) {
     let domUpdateForm = document.getElementById("modificar-prod-form")
     domUpdateForm?.addEventListener("submit", (event) => {
         event.preventDefault()
-        //! REVISAR QUÉ DEBERÍA PONER EN EL ID
         const nuevoProducto = new Producto(producto.id, domModificarTipoProd.value, domModificarMarca.value, parseFloat(domModificarPrecio.value), parseInt(domModificarStock.value), domModificarImagen.value)
         if (!validarIngresoAtributos(nuevoProducto)) {
             mostrarModalConValores("modificar", producto)
@@ -526,9 +492,14 @@ function importarStorage(nombre) {
     return JSON.parse(localStorage.getItem(nombre))
 }
 
-function cargarCatalogoImportado(productosImportados) {
+function cargarCatalogoMockAPI(productosImportados) {
     productos = []
     productosImportados.forEach(({id, tipoProd, marca, precio, stock, imagen}) => productos.push(new Producto(id, tipoProd, marca, precio, stock, imagen)))
+}
+
+function cargarUsuariosMockAPI(usuariosImportados) {
+    usuarios = []
+    usuariosImportados.forEach(({id, user, password, admin}) => usuarios.push(new Usuario(id, user, password, admin)))
 }
 
 /* El carrito guarda únicamente el id y la cantidad a comprar por el usuario
@@ -609,7 +580,6 @@ function actualizarStockCatalogo() {
     carrito.forEach(({id, cant}) => {
         let prodCatalogo = productos.find((prod) => prod.id === id)
         prodCatalogo.disminuirStock(cant)
-        console.log(prodCatalogo)
         modificarProductoMockAPI(prodCatalogo)
         })
 }
@@ -626,7 +596,7 @@ async function importarCatalogoMockAPI() {
         const response = await fetch("https://6358ae4ec26aac906f466377.mockapi.io/productos")
         const data = await response.json()
         const catalogoImportadoJSON = [...data]
-        cargarCatalogoImportado(catalogoImportadoJSON)
+        cargarCatalogoMockAPI(catalogoImportadoJSON)
         mostrarProductos(productos)
         if (target === "client") {
             mostrarCarrito()
@@ -634,6 +604,7 @@ async function importarCatalogoMockAPI() {
     }
     catch (error) {
         console.log(error)
+        mostrarAlert("Atención", "Existen inconvenientes al cargar el catálogo, vuelva a probar más tarde", "warning")
     }
 }
 
@@ -652,6 +623,7 @@ async function registrarProductoMockAPI(producto) {
     }
     catch (error) {
         console.log(error)
+        mostrarAlert("Atención", "Existen inconvenientes para registrar el producto, vuelva a probar más tarde", "warning")
     }
 }
 
@@ -670,6 +642,7 @@ async function modificarProductoMockAPI(producto) {
     }
     catch (error) {
         console.log(error)
+        mostrarAlert("Atención", "Existen inconvenientes para modificar el producto, vuelva a probar más tarde", "warning")
     }
 }
 
@@ -683,6 +656,21 @@ async function eliminarProductoMockAPI(idProducto) {
     }
     catch (error) {
         console.log(error)
+        mostrarAlert("Atención", "Existen inconvenientes para eliminar productos, vuelva a probar más tarde", "warning")
+    }
+}
+
+// GET PARA CARGAR USUARIOS DE MOCK API
+async function importarUsuariosMockAPI() {
+    try {
+        const response = await fetch("https://6358ae4ec26aac906f466377.mockapi.io/usuarios")
+        const data = await response.json()
+        const usuariosImportadoJSON = [...data]
+        cargarUsuariosMockAPI(usuariosImportadoJSON)
+    }
+    catch (error) {
+        console.log(error)
+        mostrarAlert("Atención", "Existen inconvenientes para validar sus datos, vuelva a probar más tarde", "warning")
     }
 }
 
@@ -694,13 +682,10 @@ function cerrarSesion() {
 
 function main() {
 
-    // GENERACIÓN DE USUARIOS
-    usuarios.push(new Usuario("admin", "1234", true))
-    usuarios.push(new Usuario("maxi", "maxizero", false))
-    usuarios.push(new Usuario("a", "a", false))
-
+    importarUsuariosMockAPI()
     domElementsInit()
     domEventsInit()
+
 }
 
 /* ================ LLAMADO FUNCIÓN PRINCIPAL ================ */
