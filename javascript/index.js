@@ -463,10 +463,8 @@ function confirmarCambioProducto(nuevoProducto) {
 }
 
 function eliminarProducto(producto) {
-    const posicionProducto = productos.indexOf(producto)
-    productos.splice(posicionProducto,1)
     eliminarProductoMockAPI(producto.id)
-    mostrarProductos(productos,"admin")
+    mostrarAlert("Baja exitosa", "Se ha eliminado del catálogo el producto seleccionado", "success")
 }
 
 validarRepetido = (id) => carrito.some((objectCarrito) => objectCarrito.id === id)
@@ -480,7 +478,7 @@ function altaCarrito(id, stock, cantSolicitada) {
         carrito.push(objectCarrito)
         enviarAStorage(carrito, usuarioLogueado.user)
         mostrarCarrito()
-        mostrarToast()
+        mostrarToast("Producto agregado al carrito")
     }
     else {
         // Si el stock es 0 sale por false
@@ -497,7 +495,7 @@ function agregarRepetidoEnCarrito(id, stock, nuevaCantSolicitada) {
         carrito[posicionRepetido].cant = acumCantSolicitada
         enviarAStorage(carrito, usuarioLogueado.user)
         mostrarCarrito()
-        mostrarToast()
+        mostrarToast("Producto agregado al carrito")
     }
     else {
         // Si el stock es 0 sale por false
@@ -506,9 +504,9 @@ function agregarRepetidoEnCarrito(id, stock, nuevaCantSolicitada) {
     }
 }
 
-function mostrarToast() {
+function mostrarToast(mensaje) {
     Toastify({
-        text: "Producto agregado al carrito",
+        text: mensaje,
         duration: 3000,
         close: true,
         gravity: "top",
@@ -539,23 +537,43 @@ function cargarCatalogoImportado(productosImportados) {
 function mostrarCarrito() {   //Obtengo los atributos de los productos del catálogo que se encuentran en el carrito
     domCarrito.innerHTML = ""
     totalCompra = 0
-    carrito.forEach(({id, cant}) => {
-        let prodCatalogo = productos.find((prod) => prod.id === id)
+    carrito.forEach((itemCarrito) => {
+        let prodCatalogo = productos.find((prod) => prod.id === itemCarrito.id)
         let domItemCarrito = document.createElement("div")
         domItemCarrito.className = "producto-card"
-        domItemCarrito.id = `item-carrito-${id}`
+        domItemCarrito.id = `item-carrito-${itemCarrito.id}`
         domItemCarrito.innerHTML = `
         <img src="${prodCatalogo.imagen}" alt="${prodCatalogo.tipoProd}" class="producto-img">
         <div class="producto__info">
         <h3>Producto: ${prodCatalogo.tipoProd} - ${prodCatalogo.marca}</h3>
-        <p class="mb-0">Precio unitario: ${prodCatalogo.precio} - Cantidad a comprar: ${cant}</p>
-        <h4>Subtotal: ${prodCatalogo.precio * cant}</h4>
+        <p class="mb-0">Precio unitario: ${prodCatalogo.precio} - Cantidad a comprar: ${itemCarrito.cant}</p>
+        <h4>Subtotal: ${prodCatalogo.precio * itemCarrito.cant}</h4>
+        </div>
+        <div class="producto__compra">
+            <button id="eliminar-item-carrito-${itemCarrito.id}" class="btn btn-danger eliminar-prod-btn">Eliminar</button>
         </div>
         `
         domCarrito.append(domItemCarrito)
-        totalCompra += prodCatalogo.precio * cant
+
+        // DELETE item carrito (Cliente)
+        let domEliminarItemCarrito = document.getElementById(`eliminar-item-carrito-${itemCarrito.id}`)
+        domEliminarItemCarrito?.addEventListener("click", () => {
+            eliminarItemCarrito(itemCarrito, prodCatalogo.precio)
+        })
+
+        totalCompra += prodCatalogo.precio * itemCarrito.cant
     })
     calcularTotalCompra()
+}
+
+function eliminarItemCarrito(itemCarrito, precio) {
+    const posicionItem = carrito.indexOf(itemCarrito)
+    carrito.splice(posicionItem,1)
+    carrito.length === 0 ? vaciarCarrito() : enviarAStorage(carrito, usuarioLogueado.user)
+    totalCompra -= precio * itemCarrito.cant
+    mostrarCarrito()
+    calcularTotalCompra()
+    mostrarToast("Item eliminado del carrito")
 }
 
 function finalizarCompra() {
@@ -568,8 +586,6 @@ function finalizarCompra() {
         vaciarCarrito()
         mostrarAlert("Compra exitosa", "Muchas gracias por elegirnos", "success")
     }
-    // mostrarProductos(productos)
-    // mostrarCarrito()
 }
 
 function mostrarAlert(titulo, msjSecundario, icono) {
@@ -663,6 +679,7 @@ async function eliminarProductoMockAPI(idProducto) {
         const response = await fetch(`https://6358ae4ec26aac906f466377.mockapi.io/productos/${idProducto}`, {
             method: "DELETE",
         })
+        importarCatalogoMockAPI()
     }
     catch (error) {
         console.log(error)
