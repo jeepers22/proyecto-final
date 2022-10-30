@@ -267,33 +267,6 @@ function gestionarLogin(event) {
 // Aplicando desestructuración en parámetros del objeto Usuario
 validarLogin = ({user, password}) => usuarios.some((usuario) => (usuario.user === user && usuario.password === password))
 
-function searchProduct(event) {
-    event.preventDefault()
-    let searchProd = domSearchProduct.value
-    let listProducts = productos.filter((prod) => prod.tipoProd.toLowerCase().includes(searchProd.toLowerCase()))
-    searchProd == "" ? alert("Debe ingresar un producto a buscar") : mostrarProductos(listProducts,"client")
-    domSearchForm.reset()
-}
-
-function gestionarAltaUsuario(event) {
-    event.preventDefault()
-    domRegistroTitle.innerHTML = ""
-    let objectUser = new Usuario(domRegistroUser.value, domRegistroPass.value, false)
-    domRegistroForm.reset();
-    if (!usuarioExistente(objectUser.user)) {
-        objectUser.registrarUsuario()
-        domRegistroTitle.innerHTML += `El usuario ${objectUser.user} se ha registrado exitosamente!`
-        console.log(usuarios)
-    }
-    else {
-        domRegistroTitle.innerHTML += `Alta fallida - El usuario que intenta registrar ya existe`
-    }
-}
-
-usuarioExistente = (userAlta) => usuarios.some((usuario) => usuario.user === userAlta)
-
-productoExistente = (tipoProdAlta, marcaAlta) => productos.some((producto) => producto.tipoProd === tipoProdAlta && producto.marca === marcaAlta)
-
 function mostrarElementos(target) {
     domLoginBtn.hidden = true
     domNavContainer.hidden = false
@@ -316,7 +289,6 @@ function mostrarElementos(target) {
 
 function mostrarProductos(listProducts, targetActions) {
     domProductos.innerHTML = ""  // Evita carga repetida de catálogo ante más de un despliegue de de compra
-
     listProducts.forEach((producto) => {
         let domCard = document.createElement("div")
         domCard.className = "producto-card"
@@ -355,7 +327,7 @@ function mostrarProductos(listProducts, targetActions) {
     })
 }
 
-function actionButtons (target, idProd) {
+function actionButtons(target, idProd) {
     const actions = {
         "admin": `<button id="modificar-prod-${idProd}" class="btn btn-primary modificar-prod-btn">Modificar</button>
                   <button id="eliminar-prod-${idProd}" class="btn btn-primary  eliminar-prod-btn">Eliminar</button>`,
@@ -365,6 +337,43 @@ function actionButtons (target, idProd) {
     }
     return actions[target]
 }
+
+function searchProduct(event) {
+    event.preventDefault()
+    let searchProd = domSearchProduct.value
+    const productosABuscar = productos.filter((prod) => prod.tipoProd.toLowerCase().includes(searchProd.toLowerCase()))
+    searchProd == "" ? alert("Debe ingresar un producto a buscar") : confirmarBusqueda(productosABuscar)
+    domSearchForm.reset()
+}
+
+function confirmarBusqueda(productosABuscar) {
+    mostrarProductos(productosABuscar,"client")
+    let dombtnReiniciarBusqueda = document.getElementById("btnReiniciarBusqueda")
+    dombtnReiniciarBusqueda.hidden = false
+    dombtnReiniciarBusqueda.addEventListener("click", () => {
+        mostrarProductos(productos,"client")
+        dombtnReiniciarBusqueda.hidden = true
+    })
+}
+
+function gestionarAltaUsuario(event) {
+    event.preventDefault()
+    domRegistroTitle.innerHTML = ""
+    let objectUser = new Usuario(domRegistroUser.value, domRegistroPass.value, false)
+    domRegistroForm.reset();
+    if (!usuarioExistente(objectUser.user)) {
+        objectUser.registrarUsuario()
+        domRegistroTitle.innerHTML += `El usuario ${objectUser.user} se ha registrado exitosamente!`
+        console.log(usuarios)
+    }
+    else {
+        domRegistroTitle.innerHTML += `Alta fallida - El usuario que intenta registrar ya existe`
+    }
+}
+
+usuarioExistente = (userAlta) => usuarios.some((usuario) => usuario.user === userAlta)
+
+productoExistente = (tipoProdAlta, marcaAlta) => productos.some((producto) => producto.tipoProd === tipoProdAlta && producto.marca === marcaAlta)
 
 function enviarACarrito({id, stock}, cantSolicitada) {
     const cantCompra = parseInt(cantSolicitada)
@@ -389,11 +398,11 @@ function modificarProducto(producto) {
     domUpdateForm?.addEventListener("submit", (event) => {
         event.preventDefault()
         //! REVISAR QUÉ DEBERÍA PONER EN EL ID
-        const nuevoProducto = new Producto(1, domModificarTipoProd.value, domModificarMarca.value, parseFloat(domModificarPrecio.value), parseInt(domModificarStock.value), domModificarImagen.value)
+        const nuevoProducto = new Producto(producto.id, domModificarTipoProd.value, domModificarMarca.value, parseFloat(domModificarPrecio.value), parseInt(domModificarStock.value), domModificarImagen.value)
         if (!validarIngresoAtributos(nuevoProducto)) {
             mostrarModalConValores("modificar", producto)
         } else {
-            validarModificaciones(producto, nuevoProducto) ? confirmarCambioProducto(producto, nuevoProducto) : mostrarAlert("Ingreso fallido", "No ha modificado ningún valor", "warning")
+            validarSiHayCambios(producto, nuevoProducto) ? confirmarCambioProducto(nuevoProducto) : mostrarAlert("Ingreso fallido", "No ha modificado ningún valor", "warning")
         }
     })
 }
@@ -421,7 +430,7 @@ function mostrarModalConValores(modal, {tipoProd, marca, precio, stock, imagen})
     }
 }
 
-validarModificaciones = ({id, tipoProd, marca, precio, stock, imagen}, nuevoProducto) => (id !== nuevoProducto.id || tipoProd !== nuevoProducto.tipoProd || marca !== nuevoProducto.marca || precio !== nuevoProducto.precio || stock !== nuevoProducto.stock || imagen !== nuevoProducto.imagen)
+validarSiHayCambios = ({tipoProd, marca, precio, stock, imagen}, nuevoProducto) => (tipoProd !== nuevoProducto.tipoProd || marca !== nuevoProducto.marca || precio !== nuevoProducto.precio || stock !== nuevoProducto.stock || imagen !== nuevoProducto.imagen)
 
 function validarIngresoAtributos({precio, stock}) {
     if  (precio <= 0) {
@@ -436,19 +445,14 @@ function validarIngresoAtributos({precio, stock}) {
 }
 
 function confirmarAltaProducto(producto){
-    productos.unshift(producto)
     registrarProductoMockAPI(producto)
-    mostrarProductos(productos,"admin")
     mostrarAlert("Alta exitosa", "Se ha registrado el nuevo producto", "success")
     domAltaForm.reset()
     modalAlta.hide()
 }
 
-function confirmarCambioProducto(productoActual, nuevoProducto) {
-    const posicionProducto = productos.indexOf(productoActual)
-    productos[posicionProducto] = nuevoProducto
-    modificarProductoMockAPI(productoActual.id, nuevoProducto)
-    mostrarProductos(productos,"admin")
+function confirmarCambioProducto(nuevoProducto) {
+    modificarProductoMockAPI(nuevoProducto, "admin")
     mostrarAlert("Actualización exitosa", "Se ha modificado el producto seleccionado", "success")
     modalModificar.hide()
 }
@@ -578,7 +582,8 @@ function actualizarStockCatalogo() {
     carrito.forEach(({id, cant}) => {
         let prodCatalogo = productos.find((prod) => prod.id === id)
         prodCatalogo.disminuirStock(cant)
-        modificarProductoMockAPI(prodCatalogo.id, prodCatalogo)
+        console.log(prodCatalogo)
+        modificarProductoMockAPI(prodCatalogo, "client")
         })
 }
 
@@ -613,8 +618,9 @@ async function registrarProductoMockAPI(producto) {
             body: JSON.stringify(producto),
             headers: {
                 "Content-type": "application/json; charset=UTF-8"
-            }
+        }
         })
+        importarCatalogoMockAPI("admin")
     }
     catch (error) {
         console.log(error)
@@ -622,9 +628,9 @@ async function registrarProductoMockAPI(producto) {
 }
 
 // PUT MOCK API
-async function modificarProductoMockAPI(idProducto, producto) {
+async function modificarProductoMockAPI(producto, target) {
     try {
-        const response = await fetch(`https://6358ae4ec26aac906f466377.mockapi.io/productos/${idProducto}`,
+        const response = await fetch(`https://6358ae4ec26aac906f466377.mockapi.io/productos/${producto.id}`,
         {
             method: "PUT",
             body: JSON.stringify(producto),
@@ -632,6 +638,7 @@ async function modificarProductoMockAPI(idProducto, producto) {
                 "Content-type": "application/json; charset=UTF-8"
             }
         })
+        importarCatalogoMockAPI(target)
     }
     catch (error) {
         console.log(error)
