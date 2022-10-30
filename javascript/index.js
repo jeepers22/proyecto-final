@@ -4,6 +4,11 @@ let usuarios = []
 let productos
 let carrito
 
+// VARIABLES LOCALES
+
+let usuarioLogueado
+let target
+
 // VARs DOM ELEMENTS
 let domNavContainer
 let domRegistroTitle
@@ -250,12 +255,12 @@ function cerrarModalModificarProducto() {
 function gestionarLogin(event) {
     event.preventDefault()
     modalLogin.hide()
-    let objectUser = new Usuario(domLoginUser.value, domLoginPass.value, false)
+    usuarioLogueado = new Usuario(domLoginUser.value, domLoginPass.value, false)
     domLoginForm.reset()
-    if (validarLogin(objectUser)) {
-        // Regenero objetos de catálogo con el array de productos importado de LS
-        domCloseSession.innerText += `${objectUser.user} (Salir)`
-        !objectUser.esAdmin() ? mostrarElementos("client") : mostrarElementos("admin")
+    if (validarLogin(usuarioLogueado)) {
+        domCloseSession.innerText += `${usuarioLogueado.user} (Salir)`
+        usuarioLogueado.esAdmin() ? target = "admin" : target = "client"
+        mostrarElementos()
     }
     else {
         alert("Login fallido - Usuario o contraseña incorrectos")
@@ -267,17 +272,16 @@ function gestionarLogin(event) {
 // Aplicando desestructuración en parámetros del objeto Usuario
 validarLogin = ({user, password}) => usuarios.some((usuario) => (usuario.user === user && usuario.password === password))
 
-function mostrarElementos(target) {
+function mostrarElementos() {
     domLoginBtn.hidden = true
     domNavContainer.hidden = false
     domSearch.hidden = false
-    importarCatalogoMockAPI(target)
+    importarCatalogoMockAPI()
     switch (target) {
         case "client":
             domCarritoIcon.hidden = false
-            domCarritoGeneral.hidden = false
-            carrito = importarStorage("carrito") || []
-            // mostrarCarrito()
+            // domCarritoGeneral.hidden = false
+            carrito = importarStorage(usuarioLogueado.user) || []
             break
         case "admin":
             domAltaBtn.hidden = false
@@ -287,7 +291,7 @@ function mostrarElementos(target) {
     }
 }
 
-function mostrarProductos(listProducts, targetActions) {
+function mostrarProductos(listProducts) {
     domProductos.innerHTML = ""  // Evita carga repetida de catálogo ante más de un despliegue de de compra
     listProducts.forEach((producto) => {
         let domCard = document.createElement("div")
@@ -300,7 +304,7 @@ function mostrarProductos(listProducts, targetActions) {
                 <p>Precio: ${producto.precio} - Disponibles: ${producto.stock}</p>
             </div>
             <div class="producto__compra">
-                ${actionButtons(targetActions, producto.id)}
+                ${actionButtons(producto.id)}
             </div>
             `
         domProductos.append(domCard)
@@ -327,7 +331,7 @@ function mostrarProductos(listProducts, targetActions) {
     })
 }
 
-function actionButtons(target, idProd) {
+function actionButtons(idProd) {
     const actions = {
         "admin": `<button id="modificar-prod-${idProd}" class="btn btn-primary modificar-prod-btn">Modificar</button>
                   <button id="eliminar-prod-${idProd}" class="btn btn-primary  eliminar-prod-btn">Eliminar</button>`,
@@ -347,11 +351,13 @@ function searchProduct(event) {
 }
 
 function confirmarBusqueda(productosABuscar) {
-    mostrarProductos(productosABuscar,"client")
+    usuarioLogueado.esAdmin() ? mostrarProductos(productosABuscar,"admin") : mostrarProductos(productosABuscar,"client")
     let dombtnReiniciarBusqueda = document.getElementById("btnReiniciarBusqueda")
     dombtnReiniciarBusqueda.hidden = false
     dombtnReiniciarBusqueda.addEventListener("click", () => {
-        mostrarProductos(productos,"client")
+        console.log(usuarioLogueado)
+        console.log(usuarioLogueado.esAdmin())
+        usuarioLogueado.esAdmin() ? mostrarProductos(productos,"admin") : mostrarProductos(productos,"client")
         dombtnReiniciarBusqueda.hidden = true
     })
 }
@@ -378,7 +384,6 @@ productoExistente = (tipoProdAlta, marcaAlta) => productos.some((producto) => pr
 function enviarACarrito({id, stock}, cantSolicitada) {
     const cantCompra = parseInt(cantSolicitada)
     !validarRepetido(id) ? altaCarrito(id, stock, cantCompra) : agregarRepetidoEnCarrito(id, stock, cantCompra)
-    calcularTotalCompra()
 }
 
 function gestionarAltaProducto(event) {
@@ -452,7 +457,7 @@ function confirmarAltaProducto(producto){
 }
 
 function confirmarCambioProducto(nuevoProducto) {
-    modificarProductoMockAPI(nuevoProducto, "admin")
+    modificarProductoMockAPI(nuevoProducto)
     mostrarAlert("Actualización exitosa", "Se ha modificado el producto seleccionado", "success")
     modalModificar.hide()
 }
@@ -473,7 +478,7 @@ function altaCarrito(id, stock, cantSolicitada) {
             cant: cantSolicitada
         }
         carrito.push(objectCarrito)
-        enviarAStorage(carrito, "carrito")
+        enviarAStorage(carrito, usuarioLogueado.user)
         mostrarCarrito()
         mostrarToast()
     }
@@ -490,7 +495,7 @@ function agregarRepetidoEnCarrito(id, stock, nuevaCantSolicitada) {
     const acumCantSolicitada = carrito[posicionRepetido].cant + nuevaCantSolicitada
     if (acumCantSolicitada <= stock) {
         carrito[posicionRepetido].cant = acumCantSolicitada
-        enviarAStorage(carrito, "carrito")
+        enviarAStorage(carrito, usuarioLogueado.user)
         mostrarCarrito()
         mostrarToast()
     }
@@ -550,6 +555,7 @@ function mostrarCarrito() {   //Obtengo los atributos de los productos del catá
         domCarrito.append(domItemCarrito)
         totalCompra += prodCatalogo.precio * cant
     })
+    calcularTotalCompra()
 }
 
 function finalizarCompra() {
@@ -562,8 +568,8 @@ function finalizarCompra() {
         vaciarCarrito()
         mostrarAlert("Compra exitosa", "Muchas gracias por elegirnos", "success")
     }
-    mostrarProductos(productos, "client")
-    mostrarCarrito()
+    // mostrarProductos(productos)
+    // mostrarCarrito()
 }
 
 function mostrarAlert(titulo, msjSecundario, icono) {
@@ -575,7 +581,12 @@ function mostrarAlert(titulo, msjSecundario, icono) {
 }
 
 function calcularTotalCompra() {
-    domTotalCompra.innerText = `Importe Total Compra: $${totalCompra}`
+    if (totalCompra !== 0) {
+        domTotalCompra.innerText = `Importe Total Compra: $${totalCompra}`
+        domCarritoGeneral.hidden = false
+    } else {
+        domCarritoGeneral.hidden = true
+    }
 }
 
 function actualizarStockCatalogo() {
@@ -583,23 +594,24 @@ function actualizarStockCatalogo() {
         let prodCatalogo = productos.find((prod) => prod.id === id)
         prodCatalogo.disminuirStock(cant)
         console.log(prodCatalogo)
-        modificarProductoMockAPI(prodCatalogo, "client")
+        modificarProductoMockAPI(prodCatalogo)
         })
 }
 
 function vaciarCarrito() {
     carrito = []
-    localStorage.removeItem("carrito")
+    localStorage.removeItem(usuarioLogueado.user)
+    mostrarCarrito()
 }
 
 // GET PARA CARGAR CATALOGO DE MOCK API
-async function importarCatalogoMockAPI(target) {
+async function importarCatalogoMockAPI() {
     try {
         const response = await fetch("https://6358ae4ec26aac906f466377.mockapi.io/productos")
         const data = await response.json()
         const catalogoImportadoJSON = [...data]
         cargarCatalogoImportado(catalogoImportadoJSON)
-        mostrarProductos(productos, target)
+        mostrarProductos(productos)
         if (target === "client") {
             mostrarCarrito()
         }
@@ -620,7 +632,7 @@ async function registrarProductoMockAPI(producto) {
                 "Content-type": "application/json; charset=UTF-8"
         }
         })
-        importarCatalogoMockAPI("admin")
+        importarCatalogoMockAPI()
     }
     catch (error) {
         console.log(error)
@@ -628,7 +640,7 @@ async function registrarProductoMockAPI(producto) {
 }
 
 // PUT MOCK API
-async function modificarProductoMockAPI(producto, target) {
+async function modificarProductoMockAPI(producto) {
     try {
         const response = await fetch(`https://6358ae4ec26aac906f466377.mockapi.io/productos/${producto.id}`,
         {
@@ -638,7 +650,7 @@ async function modificarProductoMockAPI(producto, target) {
                 "Content-type": "application/json; charset=UTF-8"
             }
         })
-        importarCatalogoMockAPI(target)
+        importarCatalogoMockAPI()
     }
     catch (error) {
         console.log(error)
