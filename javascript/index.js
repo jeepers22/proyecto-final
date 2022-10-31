@@ -499,7 +499,11 @@ function cargarCatalogoMockAPI(productosImportados) {
 
 function cargarUsuariosMockAPI(usuariosImportados) {
     usuarios = []
-    usuariosImportados.forEach(({id, user, password, admin}) => usuarios.push(new Usuario(id, user, password, admin)))
+    // ACLARACIÓN: convierto string a booleano, dado que en mockAPI está seleccionado como Boolean, sin embargo veo que lo maneja como String
+    usuariosImportados.forEach(({id, user, password, admin}) =>
+        admin === "true" ? usuarios.push(new Usuario(id, user, password, true)) : usuarios.push(new Usuario(id, user, password, false))
+    )
+    console.log(usuarios)
 }
 
 /* El carrito guarda únicamente el id y la cantidad a comprar por el usuario
