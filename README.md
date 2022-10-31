@@ -1,4 +1,4 @@
-# Proyecto Final Javascript
+# Proyecto Final Javascript (alumno: MAXIMILIANO SAFRAN)
 
 Bienvenido al proyecto final de la cursada de Javascript de Coderhouse (alumno: MAXIMILIANO SAFRAN)
 
