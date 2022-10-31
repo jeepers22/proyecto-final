@@ -47,6 +47,7 @@ let domLoginPass
 // MODAL ALTA PRODUCTO
 let domAltaModal
 let modalAlta
+let domAltaForm
 let domCerrarAltaModal
 let domAltaTipoProd
 let domAltaMarca
@@ -58,7 +59,7 @@ let domAltaImagen
 let domModificarModal
 let domCerrarModificarModal
 let modalModificar
-let domAltaForm
+let domModificarForm
 let domModificarTipoProd
 let domModificarMarca
 let domModificarPrecio
@@ -363,8 +364,8 @@ function gestionarAltaProducto(event) {
 
 function modificarProducto(producto) {
     mostrarModalConValores("modificar", producto)
-    let domUpdateForm = document.getElementById("modificar-prod-form")
-    domUpdateForm?.addEventListener("submit", (event) => {
+    domModificarForm = document.getElementById("modificar-prod-form")
+    domModificarForm?.addEventListener("submit", (event) => {
         event.preventDefault()
         const nuevoProducto = new Producto(producto.id, domModificarTipoProd.value, domModificarMarca.value, parseFloat(domModificarPrecio.value), parseInt(domModificarStock.value), domModificarImagen.value)
         if (!validarIngresoAtributos(nuevoProducto)) {
