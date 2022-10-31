@@ -1,13 +1,13 @@
-// ARRAYS DE OBJETOS (Globales)
+/* ================ VARIABLES GLOBALES ================ */
+
+let usuarioLogueado
+let target
+
+// ARRAYS DE OBJETOS
 
 let usuarios = []
 let productos
 let carrito
-
-// VARIABLES LOCALES
-
-let usuarioLogueado
-let target
 
 // VARs DOM ELEMENTS
 let domNavContainer
@@ -499,11 +499,10 @@ function cargarCatalogoMockAPI(productosImportados) {
 
 function cargarUsuariosMockAPI(usuariosImportados) {
     usuarios = []
-    // ACLARACIÓN: convierto string a booleano, dado que en mockAPI está seleccionado como Boolean, sin embargo veo que lo maneja como String
+    //* ACLARACIÓN: convierto string a booleano, dado que en mockAPI está seleccionado como Boolean, sin embargo veo que lo maneja como String
     usuariosImportados.forEach(({id, user, password, admin}) =>
         admin === "true" ? usuarios.push(new Usuario(id, user, password, true)) : usuarios.push(new Usuario(id, user, password, false))
     )
-    console.log(usuarios)
 }
 
 /* El carrito guarda únicamente el id y la cantidad a comprar por el usuario
