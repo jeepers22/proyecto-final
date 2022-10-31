@@ -2,6 +2,7 @@
 
 let usuarioLogueado
 let target
+const urlAPI = "https://6358ae4ec26aac906f466377.mockapi.io"
 
 // ARRAYS DE OBJETOS
 
@@ -239,8 +240,6 @@ function cerrarModalModificarProducto() {
 function gestionarLogin(event) {
     event.preventDefault()
     modalLogin.hide()
-    // El id se autogenera de forma incremental desde mockAPI
-    // usuarioLogueado = new Usuario("", domLoginUser.value, domLoginPass.value, "")
     const userIngresado = domLoginUser.value
     const passwordIngresado = domLoginPass.value
     domLoginForm.reset()
@@ -251,7 +250,7 @@ function gestionarLogin(event) {
         mostrarElementos()
     }
     else {
-        alert("Login fallido - Usuario o contraseña incorrectos")
+        mostrarAlert("Login fallido", "Usuario y/o contraseña incorrectos", "warning")
         domSearch.hidden = true
         domNavContainer.hidden = true
     }
@@ -268,7 +267,6 @@ function mostrarElementos() {
     switch (target) {
         case "client":
             domCarritoIcon.hidden = false
-            // domCarritoGeneral.hidden = false
             carrito = importarStorage(usuarioLogueado.user) || []
             break
         case "admin":
@@ -321,11 +319,10 @@ function mostrarProductos(listProducts) {
 
 function actionButtons(idProd) {
     const actions = {
-        "admin": `<button id="modificar-prod-${idProd}" class="btn btn-primary modificar-prod-btn">Modificar</button>
-                  <button id="eliminar-prod-${idProd}" class="btn btn-primary  eliminar-prod-btn">Eliminar</button>`,
+        "admin": `<button id="modificar-prod-${idProd}" class="btn btn-warning modificar-prod-btn">Modificar</button>
+                  <button id="eliminar-prod-${idProd}" class="btn btn-danger  eliminar-prod-btn">Eliminar</button>`,
         "client": `<input type="number" min="0" max="50" class="cant-producto" id="cant-carrito-${idProd}">
-                   <button type="submit" id="agregar-carrito-${idProd}" class="btn btn-primary agregar-carrito-btn">Agregar al carrito</button>`,
-        "": ""  //! En algun momento tengo que sacar esto
+                   <button type="submit" id="agregar-carrito-${idProd}" class="btn btn-primary agregar-carrito-btn">Agregar al carrito</button>`
     }
     return actions[target]
 }
@@ -355,7 +352,7 @@ function enviarACarrito({id, stock}, cantSolicitada) {
 
 function gestionarAltaProducto(event) {
     event.preventDefault()
-    // El id se autogenera de forma incremental desde mockAPI
+    // El id se autogenera de forma incremental desde mockAPI, no generamos ningún id de nuestro lado dado que en el POST, mockAPI lo pisa
     const nuevoProducto = new Producto("", domAltaTipoProd.value, domAltaMarca.value, parseFloat(domAltaPrecio.value), parseInt(domAltaStock.value), domAltaImagen.value)
     if (!validarIngresoAtributos(nuevoProducto)) {
         mostrarModalConValores("alta", nuevoProducto)
@@ -448,7 +445,7 @@ function altaCarrito(id, stock, cantSolicitada) {
     }
     else {
         // Si el stock es 0 sale por false
-        stock ? mostrarAlert("Stock insuficiente", `Disponemos de un máximo de ${stock} unidades`, "warning") : 
+        stock ? mostrarAlert("Stock insuficiente", `Disponemos de un máximo de ${stock} unidades`, "warning") :
         mostrarAlert("Sin stock", `No quedan más unidades del producto solicitado`, "warning")
     }
 }
@@ -465,7 +462,7 @@ function agregarRepetidoEnCarrito(id, stock, nuevaCantSolicitada) {
     }
     else {
         // Si el stock es 0 sale por false
-        stock ? mostrarAlert("Stock insuficiente", `Disponemos de un máximo de ${stock} unidades`, "warning") : 
+        stock ? mostrarAlert("Stock insuficiente", `Disponemos de un máximo de ${stock} unidades`, "warning") :
         mostrarAlert("Sin stock", `No quedan más unidades del producto solicitado`, "warning")
     }
 }
@@ -596,7 +593,7 @@ function vaciarCarrito() {
 // GET PARA CARGAR CATALOGO DE MOCK API
 async function importarCatalogoMockAPI() {
     try {
-        const response = await fetch("https://6358ae4ec26aac906f466377.mockapi.io/productos")
+        const response = await fetch(`${urlAPI}/productos`)
         const data = await response.json()
         const catalogoImportadoJSON = [...data]
         cargarCatalogoMockAPI(catalogoImportadoJSON)
@@ -614,7 +611,7 @@ async function importarCatalogoMockAPI() {
 // POST MOCK API
 async function registrarProductoMockAPI(producto) {
     try {
-        const response = await fetch("https://6358ae4ec26aac906f466377.mockapi.io/productos",
+        const response = await fetch(`${urlAPI}/productos`,
         {
             method: "POST",
             body: JSON.stringify(producto),
@@ -633,7 +630,7 @@ async function registrarProductoMockAPI(producto) {
 // PUT MOCK API
 async function modificarProductoMockAPI(producto) {
     try {
-        const response = await fetch(`https://6358ae4ec26aac906f466377.mockapi.io/productos/${producto.id}`,
+        const response = await fetch(`${urlAPI}/productos/${producto.id}`,
         {
             method: "PUT",
             body: JSON.stringify(producto),
@@ -652,7 +649,7 @@ async function modificarProductoMockAPI(producto) {
 // DELETE MOCK API
 async function eliminarProductoMockAPI(idProducto) {
     try {
-        const response = await fetch(`https://6358ae4ec26aac906f466377.mockapi.io/productos/${idProducto}`, {
+        const response = await fetch(`${urlAPI}/productos/${idProducto}`, {
             method: "DELETE",
         })
         importarCatalogoMockAPI()
@@ -666,7 +663,7 @@ async function eliminarProductoMockAPI(idProducto) {
 // GET PARA CARGAR USUARIOS DE MOCK API
 async function importarUsuariosMockAPI() {
     try {
-        const response = await fetch("https://6358ae4ec26aac906f466377.mockapi.io/usuarios")
+        const response = await fetch(`${urlAPI}/usuarios`)
         const data = await response.json()
         const usuariosImportadoJSON = [...data]
         cargarUsuariosMockAPI(usuariosImportadoJSON)
