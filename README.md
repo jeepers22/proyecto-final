@@ -38,4 +38,7 @@ Manejo de usuarios y catálogo: API de pruebas (https://mockapi.io/)
 Manejo de carrito de compras: Local Storage
 
 
+Pendiente: diseño y maquetado para una buena experiencia de usuario
+
+
 Desde ya muchas gracias por visitar y testear el proyecto!
