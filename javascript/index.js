@@ -280,10 +280,11 @@ function mostrarElementos() {
 
 function mostrarProductos(listProducts) {
     domProductos.innerHTML = ""  // Evita carga repetida de catálogo ante más de un despliegue de de compra
+    console.log(`Pintando productos`)
     listProducts.forEach((producto) => {
         let domCard = document.createElement("div")
         domCard.className = "producto-card"
-        domCard.id = "producto-card-${producto.id}"
+        domCard.id = `producto-card-${producto.id}`
         domCard.innerHTML = `
             <img src="${producto.imagen}" alt="${producto.tipoProd}" class="producto-img">
             <div class="producto__info">
@@ -307,6 +308,7 @@ function mostrarProductos(listProducts) {
         // UPDATE producto (Administador)
         let domModificarProducto = document.getElementById(`modificar-prod-${producto.id}`)
         domModificarProducto?.addEventListener("click", () => {
+            console.log("1")
             modificarProducto(producto)
         })
 
@@ -364,9 +366,12 @@ function gestionarAltaProducto(event) {
 
 function modificarProducto(producto) {
     mostrarModalConValores("modificar", producto)
+    console.log("2")
     domModificarForm = document.getElementById("modificar-prod-form")
     domModificarForm?.addEventListener("submit", (event) => {
         event.preventDefault()
+        console.log("3")
+        console.log(producto)
         const nuevoProducto = new Producto(producto.id, domModificarTipoProd.value, domModificarMarca.value, parseFloat(domModificarPrecio.value), parseInt(domModificarStock.value), domModificarImagen.value)
         if (!validarIngresoAtributos(nuevoProducto)) {
             mostrarModalConValores("modificar", producto)
@@ -421,6 +426,7 @@ function confirmarAltaProducto(producto){
 }
 
 function confirmarCambioProducto(nuevoProducto) {
+    console.log("4")
     modificarProductoMockAPI(nuevoProducto)
     mostrarAlert("Actualización exitosa", "Se ha modificado el producto seleccionado", "success")
     modalModificar.hide()
@@ -493,6 +499,7 @@ function importarStorage(nombre) {
 function cargarCatalogoMockAPI(productosImportados) {
     productos = []
     productosImportados.forEach(({id, tipoProd, marca, precio, stock, imagen}) => productos.push(new Producto(id, tipoProd, marca, precio, stock, imagen)))
+    console.log("7")
 }
 
 function cargarUsuariosMockAPI(usuariosImportados) {
@@ -597,6 +604,7 @@ async function importarCatalogoMockAPI() {
         const response = await fetch(`${urlAPI}/productos`)
         const data = await response.json()
         const catalogoImportadoJSON = [...data]
+        console.log("6")
         cargarCatalogoMockAPI(catalogoImportadoJSON)
         mostrarProductos(productos)
         if (target === "client") {
@@ -640,6 +648,7 @@ async function modificarProductoMockAPI(producto) {
             }
         })
         importarCatalogoMockAPI()
+        console.log("5")
     }
     catch (error) {
         console.log(error)
